@@ -25,11 +25,17 @@
   --error-container: #ffdad6;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   max-width: 100vw;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -130,10 +136,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Custom UI Classes */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
 }
 
 .btn-primary {

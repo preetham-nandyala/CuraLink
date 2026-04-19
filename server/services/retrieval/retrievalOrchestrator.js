@@ -2,6 +2,9 @@ const OpenAlexService = require('./openAlexService');
 const PubMedService = require('./pubmedService');
 const ClinicalTrialsService = require('./clinicalTrialsService');
 
+/** In-memory Cache mapping expanded queries to finalized results */
+const orchestratorCache = new Map();
+
 /** Minimum total results before we warn — spec requires 50–300 */
 const MIN_RESULT_THRESHOLD = 50;
 
@@ -34,6 +37,13 @@ class RetrievalOrchestrator {
     if (expandedQuery.location) console.log(`   Location: ${expandedQuery.location}`);
     if (expandedQuery.synonyms?.length) {
       console.log(`   Synonyms: ${expandedQuery.synonyms.join(', ')}`);
+    }
+
+    // Attempt to resolve from cache instantly
+    const cacheKey = typeof expandedQuery === 'string' ? expandedQuery : JSON.stringify(expandedQuery);
+    if (orchestratorCache.has(cacheKey)) {
+      console.log('✅ [CACHE HIT] Orchestrator resolved completely from memory.');
+      return orchestratorCache.get(cacheKey);
     }
 
     // Fire all 3 APIs simultaneously — Promise.allSettled ensures one failure
@@ -92,7 +102,10 @@ class RetrievalOrchestrator {
     console.log(`   OpenAlex: ${openAlexPubs.length} | PubMed: ${pubmedPubs.length} | Trials: ${trials.length}`);
     console.log(`   Merged publications: ${allPublications.length} | Volume OK: ${metadata.meetsVolumeSpec}`);
 
-    return { publications: allPublications, trials, metadata };
+    const finalResult = { publications: allPublications, trials, metadata };
+    orchestratorCache.set(cacheKey, finalResult); // Saves response to memory
+
+    return finalResult;
   }
 
   /**
