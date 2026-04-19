@@ -1,67 +1,40 @@
-# 🏥 Curalink — AI Medical Research Assistant
+# Curalink AI Medical Research Assistant
 
-> AI-powered medical research companion built with MERN stack + Ollama LLM
+## Overview
+Curalink is a production-grade AI-powered medical research assistant. It integrates live API streams across PubMed, ClinicalTrials.gov, and OpenAlex, filtering data through an advanced dual-LLM MERN stack pipeline with custom dynamic ranking heuristics.
 
-![Curalink](https://img.shields.io/badge/Curalink-v1.0-cyan) ![MERN](https://img.shields.io/badge/MERN-Stack-green) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20Mistral-purple)
+## Tech Stack
+- MongoDB / Express.js / React / Node.js
+- Tailwind CSS
+- Open Source LLMs (Groq LLaMA 3.3 70B)
+- fast-xml-parser / Lucide React
 
-## 🚀 Quick Start
+## Setup Instructions
 
-### Prerequisites
-- **Node.js** 18+
-- **MongoDB** (local or Atlas)
-- **Ollama** (for local LLM)
+1. **Clone the repository.**
+2. **Install all dependencies:**
+   ```bash
+   cd server && npm install
+   cd ../client && npm install
+   ```
 
-### 1. Install Ollama (Windows)
-```powershell
-# Download from https://ollama.com/download/windows
-# After installing, pull the model:
-ollama pull mistral
-```
+3. **Environment Setup:**
+   Duplicate the `.env.example` inside the `server/` root to `.env` and configure keys.
 
-### 2. Start MongoDB
-```bash
-mongod
-```
+4. **Run the Database Seed (Optional but recommended):**
+   ```bash
+   cd server
+   node scripts/seedDemo.js
+   ```
 
-### 3. Start the Server
-```bash
-cd server
-npm install
-npm start
-```
+5. **Start Application:**
+   Run from the project root or spin up concurrently:
+   ```bash
+   # Terminal 1 - Backend
+   cd server && npm run dev
+   # Terminal 2 - Frontend
+   cd client && npm start
+   ```
 
-### 4. Start the Client
-```bash
-cd client
-npm install
-npm run dev
-```
-
-### 5. Open
-Navigate to `http://localhost:5173`
-
-## 🏗️ Architecture
-
-```
-User Query → Query Expansion (LLM) → Parallel Retrieval → Re-Ranking → LLM Reasoning → Response
-                                          ├── OpenAlex (Publications)
-                                          ├── PubMed (Publications)
-                                          └── ClinicalTrials.gov (Trials)
-```
-
-### Pipeline Details
-1. **Query Expansion**: LLM-powered synonym generation + context-aware expansion
-2. **Parallel Retrieval**: 200-300 candidates from 3 sources simultaneously
-3. **Multi-Factor Re-Ranking**: Relevance (40%) + Recency (25%) + Credibility (15%) + Quality (10%) + Location (10%)
-4. **LLM Reasoning**: Structured, citation-grounded responses via Ollama Mistral
-5. **Context Management**: Multi-turn follow-up intelligence
-
-## 📂 Tech Stack
-- **Frontend**: React 18 + Vite
-- **Backend**: Node.js + Express  
-- **Database**: MongoDB
-- **LLM**: Ollama (Mistral 7B)
-- **APIs**: OpenAlex, PubMed, ClinicalTrials.gov
-
-## 📝 License
-MIT
+6. **Usage:**
+   Navigate to the client URL on `localhost:3000` (or Vite proxy mapped). Create an account, login, and explore!

@@ -210,8 +210,14 @@ MANDATORY JSON SCHEMA:
         })
       ]);
 
-      const data1 = JSON.parse(res1.choices[0]?.message?.content || '{}');
-      const data2 = JSON.parse(res2.choices[0]?.message?.content || '{}');
+      let data1 = {}, data2 = {};
+      try {
+        data1 = JSON.parse(res1.choices[0]?.message?.content || '{}');
+      } catch (e) { console.warn("Failed to parse LLM1 JSON"); }
+      
+      try {
+        data2 = JSON.parse(res2.choices[0]?.message?.content || '{}');
+      } catch (e) { console.warn("Failed to parse LLM2 JSON"); }
 
       // Merge payloads instantly
       const finalJson = { ...data1, ...data2 };
@@ -252,6 +258,7 @@ Respond ONLY in valid JSON matching this schema:
   "conditionOverview": "string",
   "researchInsights": [{ "finding": "string", "sourcePMID": "string", "confidence": "high|medium|low" }],
   "clinicalTrialsSummary": "string",
+  "sources": ["string", "string"],
   "personalizedRecommendation": "string",
   "followUpSuggestions": ["string", "string", "string"]
 }`;
@@ -281,7 +288,7 @@ Respond ONLY in valid JSON matching this schema:
     if (publications?.length > 0) {
       block += '\n=== PUBLICATIONS ===\n';
       publications.forEach((pub, i) => {
-        block += `[P${i + 1}] "${pub.title}" | ${pub.abstract?.substring(0, 200)}\n`;
+        block += `[P${i + 1}] "${pub.title}" (${pub.year || 'N/A'}) | ${pub.abstract?.substring(0, 300)}\n`;
       });
     }
     if (trials?.length > 0) {

@@ -3,6 +3,7 @@
  */
 class Reranker {
   async rank(publications, trials, query) {
+    if (!publications.length && !trials.length) return { rankedPublications: [], rankedTrials: [] };
     console.log(`\\n🏆 Re-ranking ${publications.length} publications and ${trials.length} trials...`);
     const startTime = Date.now();
 

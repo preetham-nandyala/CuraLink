@@ -91,7 +91,7 @@ class ClinicalTrialsService {
 
     const response = await axios.get(CLINICAL_TRIALS_BASE, {
       params,
-      timeout: 8000,
+      timeout: 10000,
     });
 
     if (!response.data || !response.data.studies) return [];

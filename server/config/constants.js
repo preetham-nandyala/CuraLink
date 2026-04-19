@@ -6,10 +6,10 @@ module.exports = {
   CLINICAL_TRIALS_BASE: 'https://clinicaltrials.gov/api/v2/studies',
 
   // Retrieval Limits (OPTIMIZED — reduced fetch volume while keeping quality)
-  OPENALEX_PER_PAGE: 25,     // Was 50 — top 25 per page is sufficient after reranking
+  OPENALEX_PER_PAGE: 50,     // Rule 4
   OPENALEX_PAGES: 2,          // Keep 2 pages for depth
-  PUBMED_RETMAX: 50,          // Was 100 — PubMed XML parsing is the heaviest step
-  CLINICAL_TRIALS_PAGE_SIZE: 20,  // Was 50 — we only show top 6 anyway
+  PUBMED_RETMAX: 100,          // Rule 3
+  CLINICAL_TRIALS_PAGE_SIZE: 50,  // Rule 5
 
   // Re-ranking
   TOP_PUBLICATIONS: 5,

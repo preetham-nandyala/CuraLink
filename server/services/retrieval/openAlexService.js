@@ -117,9 +117,6 @@ class OpenAlexService {
     return [];
   }
 
-  /**
-   * Fetch a single page of OpenAlex results
-   */
   async _fetchPage(search, page, sort, dateFilter) {
     const params = {
       search,
@@ -131,9 +128,8 @@ class OpenAlexService {
 
     const response = await axios.get(OPENALEX_BASE, {
       params,
-      timeout: 8000,
+      timeout: 10000,
       headers: {
-        // Polite pool: OpenAlex prioritises requests with a contact email
         'User-Agent': 'Curalink/1.0 (mailto:curalink@research.ai)',
       },
     });
@@ -142,9 +138,6 @@ class OpenAlexService {
     return response.data.results.map(work => this._normalize(work));
   }
 
-  /**
-   * Normalize OpenAlex work to unified publication schema
-   */
   _normalize(work) {
     const doi = work.doi ? work.doi.replace('https://doi.org/', '') : '';
     return {
@@ -163,21 +156,13 @@ class OpenAlexService {
     };
   }
 
-  /**
-   * Reconstruct abstract from OpenAlex inverted index format.
-   * OpenAlex stores: { "word": [position1, position2, ...] }
-   * Sparse positions are handled correctly via filter(Boolean).
-   */
   _reconstructAbstract(invertedIndex) {
     if (!invertedIndex) return '';
     try {
-      const words = [];
-      for (const [word, positions] of Object.entries(invertedIndex)) {
-        for (const pos of positions) {
-          words[pos] = word;
-        }
-      }
-      return words.filter(Boolean).join(' ');
+      return Object.entries(invertedIndex)
+        .sort((a, b) => a[1][0] - b[1][0])
+        .map(e => e[0])
+        .join(' ');
     } catch {
       return '';
     }

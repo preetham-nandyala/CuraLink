@@ -85,7 +85,7 @@ exports.processChat = async (req, res) => {
       publications: rankedPublications,
       trials: rankedTrials,
       context: conversation.context,
-      history: conversation.messages.slice(-6),
+      history: conversation.messages.slice(-5),
       queryInfo: expandedQuery,
     });
 

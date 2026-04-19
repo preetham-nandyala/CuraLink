@@ -1,6 +1,7 @@
 const OpenAlexService = require('./openAlexService');
 const PubMedService = require('./pubmedService');
 const ClinicalTrialsService = require('./clinicalTrialsService');
+const CachedResult = require('../../models/CachedResult'); // FIX: MongoDB cache integration
 
 /** In-memory Cache mapping expanded queries to finalized results */
 const orchestratorCache = new Map();
@@ -42,9 +43,17 @@ class RetrievalOrchestrator {
     // Attempt to resolve from cache instantly
     const cacheKey = typeof expandedQuery === 'string' ? expandedQuery : JSON.stringify(expandedQuery);
     if (orchestratorCache.has(cacheKey)) {
-      console.log('✅ [CACHE HIT] Orchestrator resolved completely from memory.');
       return orchestratorCache.get(cacheKey);
     }
+    
+    // Check MongoDB TTL cache
+    try {
+      const dbCache = await CachedResult.findOne({ queryKey: cacheKey });
+      if (dbCache && dbCache.results) {
+        orchestratorCache.set(cacheKey, dbCache.results);
+        return dbCache.results;
+      }
+    } catch {}
 
     // Fire all 3 APIs simultaneously — Promise.allSettled ensures one failure
     // does not abort the others
@@ -67,6 +76,10 @@ class RetrievalOrchestrator {
     }
     if (trialsResult.status === 'rejected') {
       console.error('❌ ClinicalTrials completely failed:', trialsResult.reason?.message);
+    }
+
+    if (openAlexResult.status === 'rejected' && pubmedResult.status === 'rejected' && trialsResult.status === 'rejected') {
+      throw new Error('All external APIs failed. Please try again later or check your connection.');
     }
 
     // Merge publications with deduplication
@@ -104,6 +117,9 @@ class RetrievalOrchestrator {
 
     const finalResult = { publications: allPublications, trials, metadata };
     orchestratorCache.set(cacheKey, finalResult); // Saves response to memory
+    
+    // Save to MongoDB TTL cache asynchronously
+    CachedResult.create({ queryKey: cacheKey, results: finalResult }).catch(() => {});
 
     return finalResult;
   }

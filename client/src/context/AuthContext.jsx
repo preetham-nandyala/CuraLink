@@ -1,77 +1,69 @@
-import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const savedUser = sessionStorage.getItem('curalink_user');
-    const parsedUser = savedUser ? JSON.parse(savedUser) : null;
-    if (parsedUser?.token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
-    }
-    return parsedUser;
-  });
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('curalink_token'));
+  const [loading, setLoading] = useState(true);
 
-  // Configure Axios interceptor for JWT
+  // Synchronize token state with localStorage and auth headers
   useEffect(() => {
-    const requestInterceptor = axios.interceptors.request.use((config) => {
-      if (user?.token) {
-        config.headers.Authorization = `Bearer ${user.token}`;
-      }
-      return config;
-    });
+    if (token) {
+      localStorage.setItem('curalink_token', token);
+      verifyToken();
+    } else {
+      localStorage.removeItem('curalink_token');
+      setUser(null);
+      setLoading(false);
+    }
+  }, [token]);
 
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          logout();
+  const verifyToken = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-        return Promise.reject(error);
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        // Handle 401 or Invalid token
+        logout();
       }
-    );
-
-    return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-      axios.interceptors.response.eject(responseInterceptor);
-    };
-  }, [user]);
-
-  const login = async (email, password) => {
-    const API = import.meta.env.VITE_API_URL;
-    const { data } = await axios.post(`${API}/auth/login`, { email, password });
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    setUser(data);
-    sessionStorage.setItem('curalink_user', JSON.stringify(data));
+    } catch (error) {
+      console.error('Auth verification failed', error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const register = async (name, email, password, otp) => {
-    const API = import.meta.env.VITE_API_URL;
-    const { data } = await axios.post(`${API}/auth/register`, { name, email, password, otp });
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    setUser(data);
-    sessionStorage.setItem('curalink_user', JSON.stringify(data));
+  const login = (jwtToken, userData) => {
+    setToken(jwtToken);
+    setUser(userData);
   };
 
   const logout = () => {
-    delete axios.defaults.headers.common['Authorization'];
+    setToken(null);
     setUser(null);
-    sessionStorage.removeItem('curalink_user');
-  };
-
-  const verifyOtpLogin = async (data) => {
-    // We already passed the completed object containing the token
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    setUser(data);
-    sessionStorage.setItem('curalink_user', JSON.stringify(data));
+    localStorage.removeItem('curalink_token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token: user?.token, login, register, logout, verifyOtpLogin }}>
-      {children}
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => React.useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

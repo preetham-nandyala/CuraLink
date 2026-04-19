@@ -8,7 +8,7 @@ import {
   PanelLeftClose, PanelLeftOpen, ExternalLink, Loader2,
   Sparkles, ChevronUp, FlaskConical, BookOpen, Lightbulb,
   FileText, Activity, TrendingUp, Heart, AlertTriangle,
-  Compass, Star
+  Compass, Star, Copy
 } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL;
@@ -159,11 +159,20 @@ const MainApplication = () => {
     return (
       <div className="mb-10 animate-fade-in" key={msg.id}>
         {/* avatar + overview */}
-        <div className="flex gap-3 mb-5">
+        <div className="flex gap-3 mb-5 relative group">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white flex-none mt-0.5">
             <Sparkles size={16} />
           </div>
           <div className="flex-1 min-w-0">
+            <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button 
+                onClick={() => navigator.clipboard.writeText(JSON.stringify(d, null, 2))}
+                className="p-1.5 rounded-lg bg-surface border border-outline-variant/20 hover:bg-surface-container text-outline shadow-sm flex items-center gap-1 text-[10px] font-medium"
+                title="Copy raw JSON"
+              >
+                <Copy size={12} /> Copy
+              </button>
+            </div>
             <Section icon={Stethoscope} iconColor="text-primary" label="Condition Overview">
               <div className="text-[15px] sm:text-sm text-on-surface-variant leading-relaxed markdown-body">
                 <ReactMarkdown>{d.conditionOverview || d.condition_overview || ''}</ReactMarkdown>
@@ -375,8 +384,18 @@ const MainApplication = () => {
               <>
                 {messages.map(renderMessage)}
                 {isProcessing && (
-                  <div className="flex items-center gap-3 text-on-surface-variant text-sm px-4 py-3 rounded-xl bg-surface-container/50 animate-fade-in mb-4">
-                    <Loader2 className="animate-spin text-primary" size={16} /><span>{status}</span>
+                  <div className="mb-8 w-full animate-pulse">
+                    <div className="flex items-center gap-3 mb-4 text-primary text-sm font-semibold">
+                      <Loader2 className="animate-spin" size={16} /><span>{status}</span>
+                    </div>
+                    <div className="flex gap-4 mb-4">
+                       <div className="w-8 h-8 rounded-full bg-gray-200 flex-none" />
+                       <div className="flex-1 space-y-3 pt-1">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-full"></div>
+                          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                       </div>
+                    </div>
                   </div>
                 )}
                 <div ref={endRef} />
@@ -401,7 +420,21 @@ const MainApplication = () => {
         <div className="flex-none px-2 md:px-4 pb-4 pt-1 w-full relative z-10">
           <form onSubmit={handleSend} className="max-w-3xl mx-auto flex items-center gap-2 bg-surface rounded-2xl px-2 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)] border border-outline-variant/40 focus-within:shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-all duration-300 translate-y-0 relative z-20">
             <button type="button" onClick={() => setShowExtras(!showExtras)} className="flex-none p-2 rounded-md hover:bg-surface-container text-outline transition-colors"><Plus size={18} /></button>
-            <input type="text" ref={inputRef} value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="Ask about disease, treatment..." disabled={isProcessing} className="flex-1 bg-transparent text-[15px] md:text-base outline-none border-none shadow-none ring-0 focus:ring-0 focus:outline-none placeholder:text-outline-variant py-2.5 w-full min-w-0" />
+            <textarea 
+              ref={inputRef} 
+              value={inputVal} 
+              onChange={e => setInputVal(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend(e);
+                }
+              }}
+              placeholder="Ask about disease, treatment..." 
+              disabled={isProcessing} 
+              rows={1}
+              className="flex-1 bg-transparent text-[15px] md:text-base outline-none border-none shadow-none ring-0 focus:ring-0 focus:outline-none placeholder:text-outline-variant py-2.5 w-full min-w-0 resize-none max-h-32" 
+            />
             <button type="submit" disabled={isProcessing || (!inputVal && !diseaseInput)} className="flex-none w-10 h-10 md:w-9 md:h-9 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-30 hover:bg-primary-hover transition-all active:scale-90 shadow-md shadow-primary/20"><Send size={16} /></button>
           </form>
           <p className="text-center text-[10px] text-outline mt-1.5 pb-1">CuraLink is an AI research assistant. All insights must be independently verified. Not for direct diagnostic use.</p>
@@ -463,7 +496,7 @@ const MainApplication = () => {
               )}
 
               {activeDetail.url && (
-                <a href={activeDetail.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors shadow-sm">
+                <a href={activeDetail.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors shadow-sm">
                   <ExternalLink size={15} /> Open original paper
                 </a>
               )}
