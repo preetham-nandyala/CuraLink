@@ -6,42 +6,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
 
 :root {
-  /* Primary brand */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-soft: #dbeafe;
-  --primary-fixed: #eff6ff;
+  /* Primary brand — Deep Teal */
+  --primary: #0F6E56;
+  --primary-hover: #0a5240;
+  --primary-soft: #e7f1ef;
+  --primary-fixed: #f1f8f6;
   --on-primary: #ffffff;
 
-  /* Secondary (teal) */
-  --secondary: #0d9488;
-  --secondary-container: #ccfbf1;
-  --on-secondary-container: #0f766e;
+  /* Secondary (medium teal/accent) */
+  --secondary: #1D9E75;
+  --secondary-container: #dcfce7;
+  --on-secondary-container: #166534;
 
   /* Neutrals */
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --surface-container: #f1f5f9;
-  --surface-dim: #e2e8f0;
+  --background: #F8FAFB;
+  --surface: #FFFFFF;
+  --surface-container: #F1F5F9;
+  --surface-dim: #E2E8F0;
 
-  /* Text */
-  --on-surface: #0f172a;
-  --on-surface-variant: #475569;
-  --outline: #94a3b8;
-  --outline-variant: #cbd5e1;
+  /* Text & Borders */
+  --on-surface: #1A1A2E;
+  --on-surface-variant: #6B7280;
+  --outline: #9CA3AF;
+  --outline-variant: #E5E7EB;
 
   /* Status */
-  --error: #dc2626;
+  --error: #DC2626;
   --error-container: #fef2f2;
-  --success: #16a34a;
+  --success: #16A34A;
   --success-container: #f0fdf4;
-  --tertiary: #7c3aed;
+  --tertiary: #6D28D9;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 16px rgba(15, 110, 86, 0.08);
+  --shadow-lg: 0 8px 32px rgba(15, 110, 86, 0.12);
+  --shadow-xl: 0 20px 60px rgba(15, 110, 86, 0.15);
 }
 
 *, *::before, *::after {
@@ -157,7 +157,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ═══════════════ BUTTONS ═══════════════ */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), #3b82f6);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: var(--on-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 14px;
@@ -229,7 +229,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: linear-gradient(145deg, #f0f4ff 0%, #fafbff 40%, #f7f0fe 100%);
+  background: linear-gradient(145deg, #f0f7f5 0%, #fafffe 40%, #f4fbf9 100%);
   background-size: 200% 200%;
   animation: gradientShift 15s ease infinite;
   position: relative;
