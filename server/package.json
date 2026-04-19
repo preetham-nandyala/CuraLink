@@ -4,6 +4,7 @@
   "description": "AI-Powered Medical Research Assistant — Backend API",
   "main": "server.js",
   "scripts": {
+    "postinstall": "npm install --os=linux --cpu=x64 sharp",
     "start": "node server.js",
     "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
