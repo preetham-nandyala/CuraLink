@@ -7,12 +7,17 @@ const sourceSchema = new mongoose.Schema({
   year: Number,
   url: String,
   snippet: String,
+  abstract: String,
   platform: String,
+  citationCount: Number,
+  journal: String,
   // Clinical trial specific
   status: String,
   eligibility: String,
   location: String,
   contacts: String,
+  phases: String,
+  enrollmentCount: Number,
 }, { _id: false });
 
 const messageSchema = new mongoose.Schema({
