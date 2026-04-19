@@ -55,7 +55,7 @@ exports.processChat = async (req, res) => {
     };
 
     // Step 1: Detect intent early to save API calls
-    const intent = llmService._detectIntent(message, conversation.messages);
+    const intent = await llmService.validateMedicalIntent(message);
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 
@@ -403,7 +403,7 @@ exports.processStructuredChatStream = async (req, res) => {
     console.log(`🗣️  Structured Input STREAM: Disease="${disease}", Query="${query}", Location="${location}"`);
 
     // FIX: Detect intent on the RAW query/content, not the formatted userMessage which contains context labels
-    const intent = llmService._detectIntent(query || disease || '', conversation.messages);
+    const intent = await llmService.validateMedicalIntent(query || disease || '');
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 

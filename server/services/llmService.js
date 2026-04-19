@@ -79,6 +79,41 @@ Output:`;
     }
   }
 
+  async validateMedicalIntent(userQuery) {
+    const q = (userQuery || '').toLowerCase().trim();
+    
+    // Fast path for obvious small talk (heuristic)
+    const commonNonMed = ["hello", "hi", "how are you", "who are you", "thank you", "thanks", "hey"];
+    if (commonNonMed.some(k => q === k || q.startsWith(k + ' ')) && q.length < 30) {
+      return 'NON_MEDICAL';
+    }
+
+    // LLM validation for ambiguous queries
+    const prompt = `Classify this user query for a medical research assistant.
+Query: "${userQuery}"
+
+Rules:
+1. If the query is about diseases, treatments, clinical trials, scientific research, drug discovery, symptoms, or patient care, return "MEDICAL".
+2. If it is about greetings, physics, math, technology (unrelated to medicine), or general prose, return "NON_MEDICAL".
+
+Output ONLY the word "MEDICAL" or "NON_MEDICAL".`;
+
+    try {
+      const completion = await this.groq1.chat.completions.create({
+        model: this.model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 5,
+        temperature: 0,
+      });
+      const res = completion.choices[0]?.message?.content?.trim().toUpperCase();
+      console.log(`🧠 Intent Validation: "${userQuery}" -> ${res}`);
+      return res.includes('MEDICAL') && !res.includes('NON_') ? 'MEDICAL' : 'NON_MEDICAL';
+    } catch (err) {
+      console.warn('⚠️ Intent LLM failed, using heuristic');
+      return this._detectIntent(userQuery);
+    }
+  }
+
   _detectIntent(query, history = []) {
     const q = (query || '').toLowerCase().trim();
     if (!q) return 'NON_MEDICAL';
@@ -88,14 +123,6 @@ Output:`;
     const trialKeywords = ["clinical trial", "trial", "ongoing study", "experimental", "phase", "testing on humans", "new treatments being tested"];
     const medKeywords = ["treatment", "symptoms", "causes", "overview", "management", "risk factors", "diagnosis", "dosage"];
 
-    // Non-medical heuristic
-    const commonNonMed = ["hello", "hi", "how are you", "what's the weather", "who are you", "tell me a joke", "thank you", "thanks", "hey", "test"];
-    if (commonNonMed.some(k => q === k || q.startsWith(k + ' '))) {
-       // If it starts with common non-med, it's non-med unless it's a very specific long medical question
-       if (q.length < 50) return 'NON_MEDICAL';
-    }
-
-    // Blacklist specific non-medical jargon often returned by generic queries
     const blacklist = ["string theory", "anti-de sitter", "de rham", "p-adic", "computational complexity", "double copy"];
     if (blacklist.some(k => q.includes(k))) return 'NON_MEDICAL';
 
