@@ -159,10 +159,13 @@ class OpenAlexService {
   _reconstructAbstract(invertedIndex) {
     if (!invertedIndex) return '';
     try {
-      return Object.entries(invertedIndex)
-        .sort((a, b) => a[1][0] - b[1][0])
-        .map(e => e[0])
-        .join(' ');
+      const wordsArray = [];
+      for (const [word, positions] of Object.entries(invertedIndex)) {
+        for (const pos of positions) {
+          wordsArray[pos] = word;
+        }
+      }
+      return wordsArray.filter(Boolean).join(' ');
     } catch {
       return '';
     }

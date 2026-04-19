@@ -114,7 +114,9 @@ class PubMedService {
 
           let abstract = '';
           if (articleData.Abstract && articleData.Abstract.AbstractText) {
-            const texts = articleData.Abstract.AbstractText;
+            const texts = Array.isArray(articleData.Abstract.AbstractText) 
+              ? articleData.Abstract.AbstractText 
+              : [articleData.Abstract.AbstractText];
             abstract = texts.map(t => {
               if (typeof t === 'string') return t;
               if (typeof t === 'object') {
