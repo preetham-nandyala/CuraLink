@@ -54,21 +54,25 @@ exports.processChat = async (req, res) => {
       location: conversation.userProfile?.location || '',
     };
 
-    // Step 1: Expand query
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`🗣️  User: "${message}"`);
-    console.log(`📝 Follow-up: ${followUpAnalysis.isFollowUp ? 'Yes' : 'No'}`);
+    // Step 1: Detect intent early to save API calls
+    const intent = llmService._detectIntent(message, conversation.messages);
+    let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
+    let expandedQuery = null;
 
-    const expandedQuery = await queryExpander.expand(input, conversation.context);
-    console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
+    if (intent !== 'NON_MEDICAL') {
+      expandedQuery = await queryExpander.expand(input, conversation.context);
+      console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
 
-    // Step 2: Retrieve from all sources
-    const { publications, trials, metadata: retrievalMeta } = await orchestrator.retrieve(expandedQuery);
+      // Step 2: Retrieve from all sources
+      const fetched = await orchestrator.retrieve(expandedQuery);
+      publications = fetched.publications; trials = fetched.trials; retrievalMeta = fetched.metadata;
 
-    // Step 3: Re-rank
-    const { rankedPublications, rankedTrials } = await reranker.rank(
-      publications, trials, expandedQuery
-    );
+      // Step 3: Re-rank
+      const ranked = await reranker.rank(publications, trials, expandedQuery);
+      rankedPublications = ranked.rankedPublications; rankedTrials = ranked.rankedTrials;
+    } else {
+      console.log(`⚠️ NON_MEDICAL intent detected. Skipping external API fetches.`);
+    }
 
     // Step 4: Generate LLM response
     const llmResponse = await llmService.generateResponse({
@@ -81,11 +85,13 @@ exports.processChat = async (req, res) => {
     });
 
     // Step 5: Update context
-    conversation.context = contextManager.updateContext(
-      conversation.context,
-      expandedQuery,
-      message
-    );
+    if (intent !== 'NON_MEDICAL' && expandedQuery) {
+      conversation.context = contextManager.updateContext(
+        conversation.context,
+        expandedQuery,
+        message
+      );
+    }
 
     // Step 6: Save messages
     // Add user message
@@ -133,7 +139,7 @@ exports.processChat = async (req, res) => {
         totalRetrieved: retrievalMeta.totalRetrieved,
         totalShown: rankedPublications.length + rankedTrials.length,
         retrievalTimeMs: retrievalMeta.retrievalTimeMs,
-        expandedQuery: expandedQuery.expandedDescription,
+        expandedQuery: expandedQuery ? expandedQuery.expandedDescription : 'N/A',
       },
       timestamp: new Date(),
     });
@@ -396,15 +402,26 @@ exports.processStructuredChatStream = async (req, res) => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`🗣️  Structured Input STREAM: Disease="${disease}", Query="${query}", Location="${location}"`);
 
-    const expandedQuery = await queryExpander.expand(input, conversation.context);
-    console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
+    const intent = llmService._detectIntent(userMessage, conversation.messages);
+    let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
+    let expandedQuery = null;
 
-    const { publications, trials, metadata: retrievalMeta } = await orchestrator.retrieve(expandedQuery);
-    const { rankedPublications, rankedTrials } = await reranker.rank(publications, trials, expandedQuery);
+    if (intent !== 'NON_MEDICAL') {
+      expandedQuery = await queryExpander.expand(input, conversation.context);
+      console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
 
-    conversation.context = contextManager.updateContext(
-      conversation.context, expandedQuery, userMessage
-    );
+      const fetched = await orchestrator.retrieve(expandedQuery);
+      publications = fetched.publications; trials = fetched.trials; retrievalMeta = fetched.metadata;
+      
+      const ranked = await reranker.rank(publications, trials, expandedQuery);
+      rankedPublications = ranked.rankedPublications; rankedTrials = ranked.rankedTrials;
+
+      conversation.context = contextManager.updateContext(
+        conversation.context, expandedQuery, userMessage
+      );
+    } else {
+      console.log(`⚠️ NON_MEDICAL intent detected. Skipping external API fetches.`);
+    }
 
     const sources = [
       ...rankedPublications.map(pub => ({
@@ -464,7 +481,7 @@ exports.processStructuredChatStream = async (req, res) => {
         totalRetrieved: retrievalMeta.totalRetrieved,
         totalShown: rankedPublications.length + rankedTrials.length,
         retrievalTimeMs: retrievalMeta.retrievalTimeMs,
-        expandedQuery: expandedQuery.expandedDescription,
+        expandedQuery: expandedQuery ? expandedQuery.expandedDescription : 'N/A',
         aiSummary: aiSummary,
       },
       timestamp: new Date(),
