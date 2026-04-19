@@ -1,13 +1,12 @@
 const Conversation = require('../models/Conversation');
 const QueryExpander = require('../services/queryExpander');
 const RetrievalOrchestrator = require('../services/retrieval/retrievalOrchestrator');
-const Reranker = require('../services/reranker');
+const reranker = require('../services/reranker'); // already an instance
 const LLMService = require('../services/llmService');
 const ContextManager = require('../services/contextManager');
 
 const queryExpander = new QueryExpander(); // No LLM dependencies for synonym map
 const orchestrator = new RetrievalOrchestrator();
-const reranker = new Reranker();
 const llmService = new LLMService();
 const contextManager = new ContextManager();
 
