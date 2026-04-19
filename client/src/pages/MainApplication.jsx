@@ -327,7 +327,7 @@ const MainApplication = () => {
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <Stethoscope size={14} className="text-white" />
             </div>
-            <span className="font-headline font-bold text-sm">CuraLink</span>
+            <span className="font-headline font-bold text-base md:text-[15px]">CuraLink</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="p-1 rounded hover:bg-surface-container text-outline">
             <PanelLeftClose size={15} />
@@ -335,16 +335,16 @@ const MainApplication = () => {
         </div>
 
         <div className="px-3 pt-3 pb-2 flex-none">
-          <button onClick={startNew} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-outline-variant/30 text-sm font-medium text-on-surface hover:bg-surface-container transition-colors">
+          <button onClick={startNew} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border border-outline-variant/30 text-[15px] md:text-sm font-medium text-on-surface hover:bg-surface-container transition-colors">
             <Plus size={15} /> New Research
           </button>
         </div>
 
         {user && (
-          <div className="px-4 pt-2 pb-1 flex items-center justify-between flex-none">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-outline">History</span>
+          <div className="px-4 pt-3 pb-1.5 flex items-center justify-between flex-none">
+            <span className="text-[12px] md:text-[11px] font-bold uppercase tracking-widest text-outline">History</span>
             {conversations.length > 0 && (
-              <button onClick={clearAll} className="text-[10px] text-outline hover:text-error transition-colors">Clear all</button>
+              <button onClick={clearAll} className="text-[12px] md:text-[11px] text-outline hover:text-error transition-colors">Clear all</button>
             )}
           </div>
         )}
@@ -360,7 +360,7 @@ const MainApplication = () => {
             <div className="text-xs text-outline text-center mt-4">No history yet.</div>
           ) : conversations.map(c => (
             <button key={c._id} onClick={() => loadConversation(c._id)}
-              className={`w-full group flex items-center gap-1 px-3 py-1.5 rounded-md text-left text-[13px] transition-colors ${conversationId === c._id ? 'bg-surface-container font-medium text-on-surface' : 'text-on-surface-variant hover:bg-surface-container/60'}`}>
+              className={`w-full group flex items-center gap-1 px-3 py-2 rounded-md text-left text-[14px] md:text-[13px] transition-colors ${conversationId === c._id ? 'bg-surface-container font-medium text-on-surface' : 'text-on-surface-variant hover:bg-surface-container/60'}`}>
               <span className="flex-1 truncate">{c.title || c.userProfile?.diseaseOfInterest || c.context?.diseases?.[0] || 'Untitled'}</span>
               <span onClick={(e) => deleteConvo(c._id, e)} className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-error transition-all flex-none">
                 <Trash2 size={12} />
