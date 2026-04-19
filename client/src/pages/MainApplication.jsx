@@ -134,9 +134,9 @@ const MainApplication = () => {
 
   /* ── Section component ── */
   const Section = ({ icon: Icon, iconColor, label, children }) => (
-    <div className="mb-5">
-      <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 flex items-center gap-1.5">
-        <Icon size={13} className={iconColor} /> {label}
+    <div className="mb-6">
+      <h3 className="text-[13px] sm:text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2.5 flex items-center gap-1.5">
+        <Icon size={14} className={iconColor} /> {label}
       </h3>
       {children}
     </div>
@@ -147,7 +147,7 @@ const MainApplication = () => {
     if (msg.role === 'user') {
       return (
         <div className="flex justify-end mb-5" key={msg.id}>
-          <div className="bg-primary text-on-primary px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-[75%] text-sm shadow">
+          <div className="bg-primary text-on-primary px-4 py-3 rounded-2xl rounded-tr-sm max-w-[80%] text-[15px] sm:text-sm shadow-md leading-relaxed">
             {msg.content}
           </div>
         </div>
@@ -165,7 +165,7 @@ const MainApplication = () => {
           </div>
           <div className="flex-1 min-w-0">
             <Section icon={Stethoscope} iconColor="text-primary" label="Condition Overview">
-              <div className="text-sm text-on-surface-variant leading-relaxed markdown-body">
+              <div className="text-[15px] sm:text-sm text-on-surface-variant leading-relaxed markdown-body">
                 <ReactMarkdown>{d.conditionOverview || d.condition_overview || ''}</ReactMarkdown>
               </div>
             </Section>
@@ -178,7 +178,7 @@ const MainApplication = () => {
             <Section icon={Lightbulb} iconColor="text-tertiary" label="Research Insights">
               <ul className="space-y-3">
                 {d.researchInsights.map((insight, i) => (
-                  <li key={i} className="flex flex-col gap-1 text-sm text-on-surface-variant leading-relaxed bg-surface hover:bg-surface-container transition-colors rounded-xl border border-outline-variant/20 p-3">
+                  <li key={i} className="flex flex-col gap-1.5 text-[15px] sm:text-sm text-on-surface-variant leading-relaxed bg-surface hover:bg-surface-container transition-colors rounded-xl border border-outline-variant/20 p-3.5">
                     <div className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-tertiary flex-none mt-2" />
                       <span>{insight.finding || insight}</span>
@@ -208,10 +208,10 @@ const MainApplication = () => {
                     <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-1">
                       <div className="flex items-start gap-2">
                         <span className="flex-none w-6 h-5 rounded bg-primary text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
-                        <h4 className="text-sm font-semibold group-hover:text-primary transition-colors">{pub.title} ({pub.year || 'N/A'})</h4>
+                        <h4 className="text-[14px] sm:text-sm font-semibold group-hover:text-primary transition-colors leading-snug">{pub.title} ({pub.year || 'N/A'})</h4>
                       </div>
                     </div>
-                    <p className="text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1">{pub.snippet || pub.abstract || 'No abstract available.'}</p>
+                    <p className="text-[13px] sm:text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1.5 leading-relaxed">{pub.snippet || pub.abstract || 'No abstract available.'}</p>
                   </div>
                 ))}
               </div>
@@ -232,8 +232,8 @@ const MainApplication = () => {
                         {trial.status || 'Unknown Status'}
                       </span>
                     </div>
-                    <h4 className="text-sm font-semibold group-hover:text-secondary transition-colors ml-8">{trial.title}</h4>
-                    <p className="text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1">{trial.abstract || trial.eligibility || 'Details inside.'}</p>
+                    <h4 className="text-[14px] sm:text-sm font-semibold group-hover:text-secondary transition-colors ml-8 leading-snug">{trial.title}</h4>
+                    <p className="text-[13px] sm:text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1.5 leading-relaxed">{trial.abstract || trial.eligibility || 'Details inside.'}</p>
                   </div>
                 ))}
               </div>
@@ -364,12 +364,12 @@ const MainApplication = () => {
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-5 py-6 w-full">
             {messages.length === 0 ? (
-              <div className="h-full min-h-[65vh] flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3">
-                  <Stethoscope size={24} />
+              <div className="h-full min-h-[65vh] flex flex-col items-center justify-center text-center px-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center text-primary mb-4 shadow-sm">
+                  <Stethoscope size={28} />
                 </div>
-                <h2 className="font-headline font-bold text-lg mb-1">Hi, {user?.name?.split(' ')[0] || 'Researcher'}</h2>
-                <p className="text-sm text-on-surface-variant max-w-sm">Ask about any disease, treatment, or research question.</p>
+                <h2 className="font-headline font-bold text-xl sm:text-lg mb-1.5">Hi, {user?.name?.split(' ')[0] || 'Researcher'}</h2>
+                <p className="text-[15px] sm:text-sm text-on-surface-variant max-w-sm leading-relaxed">Ask about any disease, treatment, or research question. We search PubMed, OpenAlex & ClinicalTrials.gov.</p>
               </div>
             ) : (
               <>
@@ -401,8 +401,8 @@ const MainApplication = () => {
         <div className="flex-none px-2 md:px-4 pb-4 pt-1 w-full relative z-10">
           <form onSubmit={handleSend} className="max-w-3xl mx-auto flex items-center gap-2 bg-surface rounded-2xl px-2 py-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)] border border-outline-variant/40 focus-within:shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-all duration-300 translate-y-0 relative z-20">
             <button type="button" onClick={() => setShowExtras(!showExtras)} className="flex-none p-2 rounded-md hover:bg-surface-container text-outline transition-colors"><Plus size={18} /></button>
-            <input type="text" ref={inputRef} value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="Ask about disease, treatment..." disabled={isProcessing} className="flex-1 bg-transparent text-sm md:text-base outline-none border-none shadow-none ring-0 focus:ring-0 focus:outline-none placeholder:text-outline-variant py-2 w-full min-w-0" />
-            <button type="submit" disabled={isProcessing || (!inputVal && !diseaseInput)} className="flex-none w-10 h-10 md:w-9 md:h-9 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-30 hover:bg-primary-hover transition-colors"><Send size={16} /></button>
+            <input type="text" ref={inputRef} value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="Ask about disease, treatment..." disabled={isProcessing} className="flex-1 bg-transparent text-[15px] md:text-base outline-none border-none shadow-none ring-0 focus:ring-0 focus:outline-none placeholder:text-outline-variant py-2.5 w-full min-w-0" />
+            <button type="submit" disabled={isProcessing || (!inputVal && !diseaseInput)} className="flex-none w-10 h-10 md:w-9 md:h-9 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-30 hover:bg-primary-hover transition-all active:scale-90 shadow-md shadow-primary/20"><Send size={16} /></button>
           </form>
           <p className="text-center text-[10px] text-outline mt-1.5 pb-1">CuraLink is an AI research assistant. All insights must be independently verified. Not for direct diagnostic use.</p>
         </div>

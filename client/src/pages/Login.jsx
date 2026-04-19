@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Stethoscope, Loader2, KeyRound, Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Stethoscope, Loader2, Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft, Sparkles, BookOpen, FlaskConical } from 'lucide-react';
 import axios from 'axios';
 
 const Login = () => {
@@ -12,7 +12,7 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   // Forgot Password States
-  const [resetStep, setResetStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
+  const [resetStep, setResetStep] = useState(1);
   const [resetEmail, setResetEmail] = useState('');
   const [resetOtp, setResetOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -38,8 +38,6 @@ const Login = () => {
     }
   };
 
-  // --- Password Reset Handlers ---
-
   const handleSendResetOtp = async (e) => {
     e.preventDefault();
     setResetError('');
@@ -49,7 +47,7 @@ const Login = () => {
       await axios.post(`${API}/auth/forgot-password`, { email: resetEmail });
       setResetStep(2);
     } catch (err) {
-      setResetError(err.response?.data?.message || 'Failed to send reset code. Please try again.');
+      setResetError(err.response?.data?.message || 'Failed to send reset code.');
     } finally {
       setResetLoading(false);
     }
@@ -57,37 +55,24 @@ const Login = () => {
 
   const handleVerifyResetOtp = (e) => {
     e.preventDefault();
-    if (resetOtp.length === 6) {
-      setResetStep(3);
-    } else {
-      setResetError('Please enter a valid 6-digit code.');
-    }
+    if (resetOtp.length === 6) setResetStep(3);
+    else setResetError('Please enter a valid 6-digit code.');
   };
 
   const handleFinalReset = async (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      return setResetError('Passwords do not match.');
-    }
-    if (newPassword.length < 6) {
-      return setResetError('Password must be at least 6 characters.');
-    }
+    if (newPassword !== confirmPassword) return setResetError('Passwords do not match.');
+    if (newPassword.length < 6) return setResetError('Password must be at least 6 characters.');
 
     setResetError('');
     setResetLoading(true);
     try {
       const API = import.meta.env.VITE_API_URL;
-      await axios.post(`${API}/auth/reset-password`, { 
-        email: resetEmail, 
-        otp: resetOtp, 
-        newPassword 
-      });
-      setResetSuccess('Password updated successfully! You can now log in.');
-      setTimeout(() => {
-        closeModal();
-      }, 2000);
+      await axios.post(`${API}/auth/reset-password`, { email: resetEmail, otp: resetOtp, newPassword });
+      setResetSuccess('Password updated! You can now log in.');
+      setTimeout(() => closeModal(), 2000);
     } catch (err) {
-      setResetError(err.response?.data?.message || 'Failed to reset password. Please try again.');
+      setResetError(err.response?.data?.message || 'Failed to reset password.');
     } finally {
       setResetLoading(false);
     }
@@ -104,221 +89,156 @@ const Login = () => {
     setResetSuccess('');
   };
 
+  const InputWithIcon = ({ icon: Icon, ...props }) => (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <Icon size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--outline)', pointerEvents: 'none' }} />
+      <input {...props} style={{
+        width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem', paddingTop: '0.938rem', paddingBottom: '0.938rem',
+        background: 'var(--surface-container)', border: '1.5px solid var(--outline-variant)', borderRadius: '14px',
+        fontSize: '0.938rem', color: 'var(--on-surface)', outline: 'none', transition: 'all 0.2s',
+        fontFamily: 'inherit',
+        ...(props.style || {}),
+      }}
+        onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 4px rgba(37,99,235,0.1)'; }}
+        onBlur={e => { e.target.style.borderColor = 'var(--outline-variant)'; e.target.style.boxShadow = 'none'; }}
+      />
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center font-body animate-fade-in px-4">
-      
-      {/* 🚀 MULTI-STEP FORGOT PASSWORD MODAL */}
+    <div className="auth-page">
+      {/* FORGOT PASSWORD MODAL */}
       {showForgotPassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
-            onClick={closeModal}
-          />
-          <div className="relative bg-surface rounded-3xl shadow-2xl z-10 p-8 w-[85vw] md:w-[60vw] lg:w-[40vw] max-w-[500px] border border-outline-variant/30 overflow-hidden transform transition-all animate-scale-in">
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 ring-4 ring-primary/5">
-                {resetStep === 1 && <Mail size={32} />}
-                {resetStep === 2 && <ShieldCheck size={32} />}
-                {resetStep === 3 && <Lock size={32} />}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }} onClick={closeModal} />
+          <div className="auth-card animate-scale-in" style={{ position: 'relative', zIndex: 10, maxWidth: '440px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--primary-fixed)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '1rem' }}>
+                {resetStep === 1 && <Mail size={28} />}
+                {resetStep === 2 && <ShieldCheck size={28} />}
+                {resetStep === 3 && <Lock size={28} />}
               </div>
-              <h2 className="text-2xl font-headline font-bold text-on-surface mb-2">
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--on-surface)', marginBottom: '0.375rem' }}>
                 {resetStep === 1 && "Password Recovery"}
                 {resetStep === 2 && "Verify Code"}
                 {resetStep === 3 && "New Password"}
               </h2>
-              <p className="text-on-surface-variant text-sm mb-8 leading-relaxed">
-                {resetStep === 1 && "Enter your registered email to receive a 6-digit verification code."}
-                {resetStep === 2 && `We've sent a secure code to ${resetEmail}. Check your inbox.`}
-                {resetStep === 3 && "Create a strong new password to secure your account."}
+              <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.875rem', lineHeight: 1.5 }}>
+                {resetStep === 1 && "Enter your email to receive a verification code."}
+                {resetStep === 2 && `Code sent to ${resetEmail}`}
+                {resetStep === 3 && "Create a strong new password."}
               </p>
             </div>
 
-            {resetError && (
-              <div className="bg-error-container text-on-error-container p-3 rounded-xl text-sm font-medium text-center mb-6 animate-shake">
-                {resetError}
-              </div>
-            )}
-            {resetSuccess && (
-              <div className="bg-success-container/20 border border-success/30 text-success p-3 rounded-xl text-sm font-medium text-center mb-6">
-                {resetSuccess}
-              </div>
-            )}
+            {resetError && <div style={{ background: 'var(--error-container)', color: 'var(--error)', padding: '0.75rem', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }} className="animate-shake">{resetError}</div>}
+            {resetSuccess && <div style={{ background: 'var(--success-container)', color: 'var(--success)', padding: '0.75rem', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>{resetSuccess}</div>}
 
-            {/* STEP 1: EMAIL */}
             {resetStep === 1 && (
-              <form onSubmit={handleSendResetOtp} className="space-y-5">
-                <div className="relative flex items-center">
-                  <Mail className="absolute left-4 text-outline" size={18} />
-                  <input
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-surface-variant/30 border border-outline-variant/50 rounded-2xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-on-surface text-[15px]"
-                    placeholder="Enter account email"
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  disabled={resetLoading}
-                  className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
-                >
+              <form onSubmit={handleSendResetOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <InputWithIcon icon={Mail} type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required placeholder="Enter account email" />
+                <button type="submit" disabled={resetLoading} className="btn-primary" style={{ width: '100%', padding: '0.938rem', fontSize: '0.938rem' }}>
                   {resetLoading ? <Loader2 className="animate-spin" size={20} /> : "Send Reset Code"}
                 </button>
               </form>
             )}
 
-            {/* STEP 2: OTP */}
             {resetStep === 2 && (
-              <form onSubmit={handleVerifyResetOtp} className="space-y-6">
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={resetOtp}
-                  onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, ''))}
-                  required
-                  className="w-full py-5 text-center tracking-[0.8em] text-2xl font-mono bg-surface-variant/30 border border-outline-variant/50 rounded-2xl focus:border-primary outline-none transition-all text-on-surface shadow-inner"
+              <form onSubmit={handleVerifyResetOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <input type="text" maxLength={6} value={resetOtp} onChange={e => setResetOtp(e.target.value.replace(/\D/g, ''))} required autoFocus
+                  style={{ width: '100%', padding: '1.125rem', textAlign: 'center', letterSpacing: '0.5em', fontSize: '1.5rem', fontFamily: 'monospace', background: 'var(--surface-container)', border: '1.5px solid var(--outline-variant)', borderRadius: '14px', color: 'var(--on-surface)', outline: 'none' }}
                   placeholder="------"
-                  autoFocus
                 />
-                <div className="flex flex-col gap-3">
-                  <button 
-                    type="submit" 
-                    className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
-                  >
-                    Verify Code <ArrowRight size={18} />
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setResetStep(1)}
-                    className="text-sm text-outline hover:text-primary transition-colors flex items-center justify-center gap-1"
-                  >
-                    <ArrowLeft size={14} /> Change email
-                  </button>
-                </div>
+                <button type="submit" className="btn-primary" style={{ width: '100%', padding: '0.938rem' }}>Verify Code <ArrowRight size={16} /></button>
+                <button type="button" onClick={() => setResetStep(1)} style={{ background: 'none', border: 'none', color: 'var(--outline)', fontSize: '0.875rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                  <ArrowLeft size={14} /> Change email
+                </button>
               </form>
             )}
 
-            {/* STEP 3: NEW PASSWORD */}
             {resetStep === 3 && (
-              <form onSubmit={handleFinalReset} className="space-y-4">
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 text-outline" size={18} />
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="w-full pl-12 pr-4 py-4 bg-surface-variant/30 border border-outline-variant/50 rounded-2xl focus:border-primary outline-none transition-all text-on-surface text-[15px]"
-                    placeholder="New password"
-                  />
-                </div>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 text-outline" size={18} />
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-surface-variant/30 border border-outline-variant/50 rounded-2xl focus:border-primary outline-none transition-all text-on-surface text-[15px]"
-                    placeholder="Confirm new password"
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  disabled={resetLoading}
-                  className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 mt-4"
-                >
+              <form onSubmit={handleFinalReset} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                <InputWithIcon icon={Lock} type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} placeholder="New password" />
+                <InputWithIcon icon={Lock} type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="Confirm new password" />
+                <button type="submit" disabled={resetLoading} className="btn-primary" style={{ width: '100%', padding: '0.938rem', marginTop: '0.5rem' }}>
                   {resetLoading ? <Loader2 className="animate-spin" size={20} /> : "Update Password"}
                 </button>
               </form>
             )}
-            
-            <button 
-              onClick={closeModal}
-              className="mt-6 w-full text-xs text-outline font-medium hover:text-on-surface transition-colors"
-            >
+
+            <button onClick={closeModal} style={{ marginTop: '1.25rem', width: '100%', background: 'none', border: 'none', color: 'var(--outline)', fontSize: '0.813rem', cursor: 'pointer', fontWeight: 500 }}>
               Cancel recovery
             </button>
           </div>
         </div>
       )}
 
-      {/* 🔐 MAIN LOGIN CARD */}
-      <div className="w-full max-w-[420px] bg-surface md:p-8 rounded-3xl md:shadow-xl md:border md:border-outline-variant/20">
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white mb-5 shadow-lg shadow-primary/30 rotate-3 transform hover:rotate-0 transition-transform">
-            <Stethoscope size={32} />
+      {/* MAIN LOGIN CARD */}
+      <div className="auth-card animate-fade-in">
+        {/* Logo */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            width: '60px', height: '60px', borderRadius: '18px',
+            background: 'linear-gradient(135deg, var(--primary), #3b82f6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', marginBottom: '1.25rem',
+            boxShadow: '0 8px 24px rgba(37, 99, 235, 0.3)',
+            transform: 'rotate(3deg)', transition: 'transform 0.3s',
+          }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'rotate(0deg)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'rotate(3deg)'}
+          >
+            <Stethoscope size={30} />
           </div>
-          <h1 className="text-3xl font-bold font-headline text-on-surface tracking-tight text-center">Precise Care Starts Here</h1>
-          <p className="text-on-surface-variant mt-2 text-sm">Enter details to access your dashboard</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--on-surface)', letterSpacing: '-0.03em', textAlign: 'center', lineHeight: 1.2 }}>
+            Welcome back
+          </h1>
+          <p style={{ color: 'var(--on-surface-variant)', marginTop: '0.5rem', fontSize: '0.938rem', textAlign: 'center' }}>
+            Sign in to access your research dashboard
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {error && (
-            <div className="bg-error-container/20 border border-error/20 text-on-error-container p-4 rounded-2xl text-sm font-medium text-center animate-shake">
+            <div className="animate-shake" style={{ background: 'var(--error-container)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--error)', padding: '0.875rem', borderRadius: '14px', fontSize: '0.875rem', fontWeight: 500, textAlign: 'center' }}>
               {error}
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-outline uppercase ml-1">Email Address</label>
-            <div className="relative flex items-center">
-              <Mail className="absolute left-4 text-outline" size={18} />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full pl-12 pr-4 py-4 bg-surface-variant/10 border border-outline-variant/40 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-on-surface placeholder:text-outline/60 text-[15px]"
-                placeholder="doctor@clinic.com"
-              />
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '0.05em', marginLeft: '0.25rem' }}>Email</label>
+            <InputWithIcon icon={Mail} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="doctor@clinic.com" />
           </div>
 
-          <div className="space-y-1">
-            <div className="flex justify-between items-center px-1">
-              <label className="text-xs font-bold text-outline uppercase">Password</label>
-              <button 
-                type="button" 
-                onClick={() => setShowForgotPassword(true)}
-                className="text-xs font-bold text-primary hover:underline"
-              >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '0.25rem', paddingRight: '0.25rem' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
+              <button type="button" onClick={() => setShowForgotPassword(true)} style={{ background: 'none', border: 'none', fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', cursor: 'pointer' }}>
                 Forgot?
               </button>
             </div>
-            <div className="relative flex items-center">
-              <Lock className="absolute left-4 text-outline" size={18} />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full pl-12 pr-4 py-4 bg-surface-variant/10 border border-outline-variant/40 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-on-surface placeholder:text-outline/60 text-[15px]"
-                placeholder="••••••••"
-              />
-            </div>
+            <InputWithIcon icon={Lock} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 mt-4 shadow-xl shadow-primary/20 text-lg active:scale-95"
-          >
+          <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', padding: '0.938rem', fontSize: '1rem', fontWeight: 700, marginTop: '0.5rem' }}>
             {loading ? <><Loader2 className="animate-spin" size={20} /> Signing in...</> : "Sign In"}
           </button>
         </form>
 
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <p className="text-sm text-outline">
-            New to Curallink?{' '}
-            <Link to="/register" className="text-primary font-bold hover:underline">
-              Create Account
-            </Link>
+        {/* Features */}
+        <div className="feature-pills" style={{ marginTop: '1.5rem' }}>
+          <span className="feature-pill"><BookOpen size={12} /> PubMed</span>
+          <span className="feature-pill"><FlaskConical size={12} /> Clinical Trials</span>
+          <span className="feature-pill"><Sparkles size={12} /> AI Insights</span>
+        </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--outline)' }}>
+            New to CuraLink?{' '}
+            <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>Create Account</Link>
           </p>
-          <div className="w-10 h-1 bg-outline-variant/30 rounded-full" />
+          <div style={{ width: '40px', height: '3px', background: 'var(--outline-variant)', borderRadius: '99px', opacity: 0.5 }} />
         </div>
       </div>
     </div>

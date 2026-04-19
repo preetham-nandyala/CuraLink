@@ -54,12 +54,17 @@ exports.processChat = async (req, res) => {
       location: conversation.userProfile?.location || '',
     };
 
-    // Step 1: Detect intent early to save API calls
+    // Step 1: LLM validates intent and minimizes the query simultaneously
     const intent = await llmService.validateMedicalIntent(message);
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 
     if (intent !== 'NON_MEDICAL') {
+      // Step 1b: LLM-minimize the query for precise API search
+      const cleanedQuery = await llmService.cleanQuery(message);
+      input.query = cleanedQuery;
+      console.log(`🧹 LLM-Minimized: "${message}" -> "${cleanedQuery}"`);
+
       expandedQuery = await queryExpander.expand(input, conversation.context);
       console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
 
@@ -402,12 +407,17 @@ exports.processStructuredChatStream = async (req, res) => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`🗣️  Structured Input STREAM: Disease="${disease}", Query="${query}", Location="${location}"`);
 
-    // FIX: Detect intent on the RAW query/content, not the formatted userMessage which contains context labels
+    // FIX: Detect intent on the RAW query, then LLM-minimize for precision
     const intent = await llmService.validateMedicalIntent(query || disease || '');
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 
     if (intent !== 'NON_MEDICAL') {
+      // LLM-minimize: strip noise from user query for cleaner API search
+      const cleanedQuery = await llmService.cleanQuery(query || disease);
+      input.query = cleanedQuery;
+      console.log(`🧹 LLM-Minimized: "${query || disease}" -> "${cleanedQuery}"`);
+
       expandedQuery = await queryExpander.expand(input, conversation.context);
       console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
 
