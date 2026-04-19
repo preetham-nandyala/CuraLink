@@ -58,7 +58,7 @@ const MainApplication = () => {
       const { data } = await axios.get(`${API}/conversations/${id}`, authHeaders);
       setConversationId(data._id);
       setActiveDetail(null);
-      setSidebarOpen(false); // Close sidebar on mobile after selection
+      if (window.innerWidth < 768) setSidebarOpen(false); // Close sidebar only on mobile
       const parsed = (data.messages || []).map((m, i) => {
         if (m.role === 'assistant') {
           let content;
@@ -388,7 +388,7 @@ const MainApplication = () => {
       <main className="flex-1 flex flex-col h-full min-w-0 relative">
         {/* TOP HEADER BAR */}
         <div className="flex items-center gap-3 px-3 md:px-5 h-12 border-b border-outline-variant/15 flex-none bg-surface/80 backdrop-blur-md z-10">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface transition-colors flex-none">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface transition-colors flex-none">
             {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
           </button>
           <div className="flex-1 min-w-0">
