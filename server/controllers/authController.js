@@ -5,7 +5,7 @@ const OtpVerification = require('../models/OtpVerification');
 const crypto = require('crypto');
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', { expiresIn: '30d' });
+  return jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', { expiresIn: '1h' });
 };
 
 exports.registerUser = async (req, res) => {

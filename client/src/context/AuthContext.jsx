@@ -5,7 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('curalink_user');
+    const savedUser = sessionStorage.getItem('curalink_user');
     const parsedUser = savedUser ? JSON.parse(savedUser) : null;
     if (parsedUser?.token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.token}`;
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     const { data } = await axios.post(`${API}/auth/login`, { email, password });
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     setUser(data);
-    localStorage.setItem('curalink_user', JSON.stringify(data));
+    sessionStorage.setItem('curalink_user', JSON.stringify(data));
   };
 
   const register = async (name, email, password, otp) => {
@@ -51,20 +51,20 @@ export const AuthProvider = ({ children }) => {
     const { data } = await axios.post(`${API}/auth/register`, { name, email, password, otp });
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     setUser(data);
-    localStorage.setItem('curalink_user', JSON.stringify(data));
+    sessionStorage.setItem('curalink_user', JSON.stringify(data));
   };
 
   const logout = () => {
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    localStorage.removeItem('curalink_user');
+    sessionStorage.removeItem('curalink_user');
   };
 
   const verifyOtpLogin = async (data) => {
     // We already passed the completed object containing the token
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     setUser(data);
-    localStorage.setItem('curalink_user', JSON.stringify(data));
+    sessionStorage.setItem('curalink_user', JSON.stringify(data));
   };
 
   return (
