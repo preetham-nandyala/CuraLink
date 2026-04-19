@@ -94,7 +94,7 @@ const MainApplication = () => {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    const q = inputVal.trim(), d = diseaseInput.trim();
+    const q = inputVal.trim(), d = diseaseInput.trim(), n = nameInput.trim();
     if (!q && !d) return;
 
     setMessages(prev => [...prev, { role: 'user', content: q || `Research ${d}`, id: Date.now() }]);
