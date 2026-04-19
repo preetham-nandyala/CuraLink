@@ -232,32 +232,52 @@ exports.processStructuredChat = async (req, res) => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`🗣️  Raw Input: Disease="${disease}", Query="${query}", Location="${location}"`);
 
-    // 1. Noise Removal (LLM Filter)
-    const cleanedQueryStr = await llmService.cleanQuery(input.query);
-    console.log(`🧹 Cleaned Output: "${cleanedQueryStr}"`);
-    input.query = cleanedQueryStr; // Swap in the clean query
+    // ===== GATEKEEPER: LLM Intent Validation =====
+    const intent = await llmService.validateMedicalIntent(query || disease || '');
 
-    // 2. Query Expansion & Local Routing
-    const expandedQuery = await queryExpander.expand(input, conversation.context);
-    console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
+    let rankedPublications = [], rankedTrials = [], expandedQuery = null, retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
+    let llmResponse;
 
-    // 3. Retrieval & Ranking
-    const { publications, trials, metadata: retrievalMeta } = await orchestrator.retrieve(expandedQuery);
-    const { rankedPublications, rankedTrials } = await reranker.rank(publications, trials, expandedQuery);
+    if (intent === 'NON_MEDICAL') {
+      console.log(`🛡️  NON_MEDICAL — skipping all retrieval & synthesis`);
+      llmResponse = JSON.stringify({
+        conditionOverview: "This system is designed for medical and research-related queries. Please ask about diseases, treatments, research, or clinical trials.",
+        researchInsights: [],
+        clinicalTrialsSummary: "",
+        personalizedRecommendation: "",
+        followUpSuggestions: ["Latest treatment for lung cancer", "Clinical trials for diabetes", "Recent studies on heart disease"]
+      });
+    } else {
+      // 1. Noise Removal (LLM Filter)
+      const cleanedQueryStr = await llmService.cleanQuery(input.query);
+      console.log(`🧹 Cleaned Output: "${cleanedQueryStr}"`);
+      input.query = cleanedQueryStr;
 
-    const llmResponse = await llmService.generateResponse({
-      userQuery: userMessage,
-      publications: rankedPublications,
-      trials: rankedTrials,
-      context: conversation.context,
-      history: conversation.messages.slice(-6),
-      queryInfo: expandedQuery,
-    });
+      // 2. Query Expansion & Local Routing
+      expandedQuery = await queryExpander.expand(input, conversation.context);
+      console.log(`🔍 Expanded: "${expandedQuery.primary}"`);
 
-    // Update context
-    conversation.context = contextManager.updateContext(
-      conversation.context, expandedQuery, userMessage
-    );
+      // 3. Retrieval & Ranking
+      const { publications, trials, metadata: rMeta } = await orchestrator.retrieve(expandedQuery);
+      retrievalMeta = rMeta;
+      const ranked = await reranker.rank(publications, trials, expandedQuery);
+      rankedPublications = ranked.rankedPublications;
+      rankedTrials = ranked.rankedTrials;
+
+      llmResponse = await llmService.generateResponse({
+        userQuery: userMessage,
+        publications: rankedPublications,
+        trials: rankedTrials,
+        context: conversation.context,
+        history: conversation.messages.slice(-6),
+        queryInfo: expandedQuery,
+      });
+
+      // Update context only for medical queries
+      conversation.context = contextManager.updateContext(
+        conversation.context, expandedQuery, userMessage
+      );
+    }
 
     // Build sources
     const sources = [
@@ -315,7 +335,7 @@ exports.processStructuredChat = async (req, res) => {
         totalRetrieved: retrievalMeta.totalRetrieved,
         totalShown: rankedPublications.length + rankedTrials.length,
         retrievalTimeMs: retrievalMeta.retrievalTimeMs,
-        expandedQuery: expandedQuery.expandedDescription,
+        expandedQuery: expandedQuery?.expandedDescription || '',
         aiSummary: aiSummary,
       },
       timestamp: new Date(),
@@ -346,7 +366,7 @@ exports.processStructuredChat = async (req, res) => {
           totalShown: rankedPublications.length + rankedTrials.length,
           retrievalTimeMs: retrievalMeta.retrievalTimeMs,
           totalTimeMs: totalTime,
-          expandedQuery: expandedQuery.expandedDescription,
+          expandedQuery: expandedQuery?.expandedDescription || '',
           sourceBreakdown: {
             openAlex: retrievalMeta.openAlexCount,
             pubmed: retrievalMeta.pubmedCount,
