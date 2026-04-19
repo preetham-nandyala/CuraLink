@@ -184,8 +184,12 @@ MANDATORY JSON SCHEMA:
     // --- PROMPT 2: CLINICAL STATUS ENGINE ---
     const sysPrompt2 = `You are a Clinical Trials Synthesizer. Focus purely on the clinical/experimental pipeline status. Base ALL claims ONLY on the provided trials data. No prose outside JSON.
 
-STRICT RULE: followUpSuggestions MUST be related to scientific research, clinical trials, or medical publications only.
-Examples of good follow-ups: "Latest treatment for lung cancer", "Clinical trials for diabetes", "Recent studies on Alzheimer's".
+CRITICAL RULE — followUpSuggestions:
+- MUST be strictly about medical research, diseases, treatments, clinical trials, or medical publications.
+- NEVER suggest general conversation, greetings, or non-medical topics.
+- Each suggestion must be a complete, searchable medical research query.
+- Examples of GOOD follow-ups: "Latest immunotherapy trials for melanoma", "BRCA1 mutation treatment options", "Phase 3 clinical trials for Alzheimer's disease"
+- Examples of BAD follow-ups (NEVER generate these): "Tell me more", "What else can you do?", "How are you?"
 
 MANDATORY JSON SCHEMA:
 {
@@ -253,6 +257,9 @@ MANDATORY JSON SCHEMA:
   _systemPrompt(intent) {
     return `You are a medical research assistant. Answer ONLY based on provided research.
 never hallucinate. cite source titles when making claims.
+
+CRITICAL: followUpSuggestions MUST be strictly about medical research, diseases, treatments, clinical trials, or publications. Each must be a complete searchable medical query. NEVER suggest generic or non-medical topics.
+
 Respond ONLY in valid JSON matching this schema:
 {
   "conditionOverview": "string",

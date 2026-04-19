@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import {
   Stethoscope, Send, LogOut, Plus, Trash2, X,
   PanelLeftClose, PanelLeftOpen, ExternalLink, Loader2,
-  Sparkles, ChevronUp, FlaskConical, BookOpen, Lightbulb,
+  Sparkles, ChevronUp, ChevronDown, FlaskConical, BookOpen, Lightbulb,
   FileText, Activity, TrendingUp, Heart, AlertTriangle,
   Compass, Star, Copy
 } from 'lucide-react';
@@ -32,6 +32,7 @@ const MainApplication = () => {
   const [nameInput, setNameInput] = useState('');
 
   const [activeDetail, setActiveDetail] = useState(null);
+  const [expandedSections, setExpandedSections] = useState({});
 
   const endRef = useRef(null);
   const inputRef = useRef(null);
@@ -206,48 +207,70 @@ const MainApplication = () => {
 
 
 
-          {/* Key Publications - Native Pipeline Feed */}
-          {msg.sources?.filter(s => s.type === 'publication').length > 0 && (
-            <Section icon={BookOpen} iconColor="text-primary" label="Key Publications">
-              <div className="space-y-2">
-                {msg.sources.filter(s => s.type === 'publication').map((pub, idx) => (
-                  <div key={idx}
-                    onClick={() => setActiveDetail({ ...pub, type: 'publication' })}
-                    className="bg-surface border border-outline-variant/20 rounded-xl p-3 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all group">
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-1">
-                      <div className="flex items-start gap-2">
-                        <span className="flex-none w-6 h-5 rounded bg-primary text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
-                        <h4 className="text-[14px] sm:text-sm font-semibold group-hover:text-primary transition-colors leading-snug">{pub.title} ({pub.year || 'N/A'})</h4>
+          {/* Key Publications - Collapsible Dropdown */}
+          {(() => {
+            const pubs = msg.sources?.filter(s => s.type === 'publication') || [];
+            if (pubs.length === 0) return null;
+            const pubKey = `pub-${msg.id}`;
+            const isOpen = expandedSections[pubKey];
+            return (
+              <div className="mb-6">
+                <button type="button" onClick={() => setExpandedSections(prev => ({ ...prev, [pubKey]: !prev[pubKey] }))} className="w-full flex items-center justify-between text-[13px] sm:text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2.5 hover:text-primary transition-colors">
+                  <span className="flex items-center gap-1.5"><BookOpen size={14} className="text-primary" /> Key Publications ({pubs.length})</span>
+                  {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+                {isOpen && (
+                  <div className="space-y-2 animate-fade-in">
+                    {pubs.map((pub, idx) => (
+                      <div key={idx}
+                        onClick={() => setActiveDetail({ ...pub, type: 'publication' })}
+                        className="bg-surface border border-outline-variant/20 rounded-xl p-3 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all group">
+                        <div className="flex items-start gap-2">
+                          <span className="flex-none w-6 h-5 rounded bg-primary text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
+                          <h4 className="text-[14px] sm:text-sm font-semibold group-hover:text-primary transition-colors leading-snug line-clamp-2">{pub.title} ({pub.year || 'N/A'})</h4>
+                        </div>
+                        <p className="text-[13px] sm:text-xs text-on-surface-variant ml-8 line-clamp-3 mt-1.5 leading-relaxed">{pub.snippet || pub.abstract || 'No abstract available.'}</p>
                       </div>
-                    </div>
-                    <p className="text-[13px] sm:text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1.5 leading-relaxed">{pub.snippet || pub.abstract || 'No abstract available.'}</p>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            </Section>
-          )}
+            );
+          })()}
 
-          {/* Clinical Trials - Native Pipeline Feed */}
-          {msg.sources?.filter(s => s.type === 'clinical_trial').length > 0 && (
-            <Section icon={FlaskConical} iconColor="text-secondary" label="Clinical Trials">
-              <div className="space-y-2">
-                {msg.sources.filter(s => s.type === 'clinical_trial').map((trial, idx) => (
-                  <div key={idx}
-                    onClick={() => setActiveDetail({ ...trial, type: 'trial' })}
-                    className="bg-surface border border-outline-variant/20 rounded-xl p-3 cursor-pointer hover:border-secondary/40 hover:shadow-sm transition-all group">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="flex-none w-6 h-5 rounded bg-secondary text-white text-[10px] font-bold flex items-center justify-center">{idx + 1}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex-none ${trial.status?.toLowerCase().includes('recruiting') && !trial.status?.toLowerCase().includes('not') ? 'bg-secondary-container/40 text-secondary' : trial.status?.toLowerCase().includes('completed') ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>
-                        {trial.status || 'Unknown Status'}
-                      </span>
-                    </div>
-                    <h4 className="text-[14px] sm:text-sm font-semibold group-hover:text-secondary transition-colors ml-8 leading-snug">{trial.title}</h4>
-                    <p className="text-[13px] sm:text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1.5 leading-relaxed">{trial.abstract || trial.eligibility || 'Details inside.'}</p>
+          {/* Clinical Trials - Collapsible Dropdown */}
+          {(() => {
+            const trials = msg.sources?.filter(s => s.type === 'clinical_trial') || [];
+            if (trials.length === 0) return null;
+            const trialKey = `trial-${msg.id}`;
+            const isOpen = expandedSections[trialKey];
+            return (
+              <div className="mb-6">
+                <button type="button" onClick={() => setExpandedSections(prev => ({ ...prev, [trialKey]: !prev[trialKey] }))} className="w-full flex items-center justify-between text-[13px] sm:text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2.5 hover:text-secondary transition-colors">
+                  <span className="flex items-center gap-1.5"><FlaskConical size={14} className="text-secondary" /> Clinical Trials ({trials.length})</span>
+                  {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+                {isOpen && (
+                  <div className="space-y-2 animate-fade-in">
+                    {trials.map((trial, idx) => (
+                      <div key={idx}
+                        onClick={() => setActiveDetail({ ...trial, type: 'trial' })}
+                        className="bg-surface border border-outline-variant/20 rounded-xl p-3 cursor-pointer hover:border-secondary/40 hover:shadow-sm transition-all group">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="flex-none w-6 h-5 rounded bg-secondary text-white text-[10px] font-bold flex items-center justify-center">{idx + 1}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex-none ${trial.status?.toLowerCase().includes('recruiting') && !trial.status?.toLowerCase().includes('not') ? 'bg-secondary-container/40 text-secondary' : trial.status?.toLowerCase().includes('completed') ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+                            {trial.status || 'Unknown Status'}
+                          </span>
+                        </div>
+                        <h4 className="text-[14px] sm:text-sm font-semibold group-hover:text-secondary transition-colors ml-8 leading-snug line-clamp-2">{trial.title}</h4>
+                        <p className="text-[13px] sm:text-xs text-on-surface-variant ml-8 line-clamp-3 mt-1.5 leading-relaxed">{trial.abstract || trial.eligibility || 'Details inside.'}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            </Section>
-          )}
+            );
+          })()}
 
           {/* Clinical Trials Summary */}
           {d.clinicalTrialsSummary && (
@@ -289,7 +312,7 @@ const MainApplication = () => {
 
   /* ═══════════════════════ LAYOUT ═══════════════════════ */
   return (
-    <div className="flex h-screen bg-background overflow-hidden font-body">
+    <div className="flex bg-background overflow-hidden font-body" style={{ height: '100dvh' }}>
 
       {/* MOBILE OVERLAY */}
       {sidebarOpen && (
@@ -430,7 +453,7 @@ const MainApplication = () => {
                   handleSend(e);
                 }
               }}
-              placeholder="Ask about disease, treatment..." 
+              placeholder="Search medical research..." 
               disabled={isProcessing} 
               rows={1}
               className="flex-1 bg-transparent text-[15px] md:text-base outline-none border-none shadow-none ring-0 focus:ring-0 focus:outline-none placeholder:text-outline-variant py-2.5 w-full min-w-0 resize-none max-h-32" 
