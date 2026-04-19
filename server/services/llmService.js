@@ -197,13 +197,7 @@ MANDATORY JSON SCHEMA:
 {
   "condition_overview": "Specific answer for ${intent}. Start with 'The most important treatments today are: '.",
   "research_insights": ["Most impactful shift: ...", "Standard insight...", "Emerging insight...", "Experimental insight..."],
-  "treatment_direction": "Standard-of-care: ... Emerging direction: ...",
-  "patient_summary": "* **For patients:** ...\\n* **For clinicians:** ...\\n* **Future outlook:** ...",
-  "key_takeaway": "Final 1-2 decisive sentences on the ${intent} landscape.",
-  "limitations": "Data quality notes.",
-  "clinical_trials": [ { "id": "T1", "title": "...", "status": "...", "summary": "...", "why_it_matters": "...", "eligibility": "...", "most_relevant": true } ],
-  "publications": [ { "id": "P1", "title": "...", "year": 2024, "key_finding": "...", "why_it_matters": "...", "authors": "...", "source": "...", "abstract": "...", "url": "..." } ],
-  "no_trials_explanation": "If trials are missing, provide clinical context."
+  "key_takeaway": "Final 1-2 decisive sentences on the ${intent} landscape."
 }
 
 CRITICAL CONSTRAINTS:

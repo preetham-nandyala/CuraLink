@@ -187,24 +187,6 @@ const MainApplication = () => {
             </Section>
           )}
 
-          {/* Treatment Direction */}
-          {d.treatment_direction && (
-            <Section icon={TrendingUp} iconColor="text-secondary" label="Treatment Direction">
-              <div className="text-sm text-on-surface-variant leading-relaxed markdown-body">
-                <ReactMarkdown>{d.treatment_direction.replace(/Standard-of-care:/g, '**Standard-of-care:**').replace(/Emerging direction:/g, '**Emerging direction:**')}</ReactMarkdown>
-              </div>
-            </Section>
-          )}
-
-          {/* What This Means */}
-          {d.patient_summary && (
-            <Section icon={Heart} iconColor="text-error" label="What This Means for You">
-              <div className="text-sm text-on-surface-variant leading-relaxed bg-primary/[0.03] border-l-2 border-primary/30 pl-3 py-2 rounded-r-lg markdown-body">
-                <ReactMarkdown>{d.patient_summary}</ReactMarkdown>
-              </div>
-            </Section>
-          )}
-
           {/* Key Takeaway */}
           {d.key_takeaway && (
             <Section icon={Compass} iconColor="text-primary" label="Key Takeaway">
@@ -214,75 +196,46 @@ const MainApplication = () => {
             </Section>
           )}
 
-          {/* Clinical Trials */}
-          {(d.clinical_trials?.length > 0 || d.no_trials_explanation) && (
-            <Section icon={FlaskConical} iconColor="text-secondary" label="Clinical Trials">
-              {d.clinical_trials?.length > 0 ? (
-                <div className="space-y-2">
-                  {d.clinical_trials.map((trial) => (
-                    <div key={trial.id}
-                      onClick={() => setActiveDetail({ ...trial, type: 'trial' })}
-                      className={`bg-surface border rounded-xl p-3 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all group ${trial.most_relevant ? 'border-secondary/40 ring-1 ring-secondary/20' : 'border-outline-variant/20'}`}>
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="flex-none w-7 h-5 rounded bg-secondary text-white text-[9px] font-bold flex items-center justify-center">{trial.id}</span>
-                          <h4 className="text-sm font-semibold group-hover:text-primary transition-colors">{trial.title}</h4>
-                          {trial.most_relevant && (
-                            <span className="flex items-center gap-0.5 text-[9px] font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded-full flex-none">
-                              <Star size={8} className="fill-secondary" /> Most Relevant
-                            </span>
-                          )}
-                        </div>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded flex-none ${trial.status?.toLowerCase().includes('recruiting') ? 'bg-secondary-container/40 text-secondary' : 'bg-surface-container text-on-surface-variant'}`}>
-                          {trial.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-on-surface-variant ml-9">{trial.summary}</p>
-                      {trial.why_it_matters && (
-                        <p className="text-[11px] text-primary/80 ml-9 mt-1 italic">{trial.why_it_matters}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-surface border border-outline-variant/15 border-dashed rounded-xl p-4">
-                  <p className="text-sm font-semibold text-on-surface mb-1">No highly relevant clinical trials were found.</p>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">
-                    {d.no_trials_explanation || "This is likely because the query targets early-stage or preclinical research areas, which are not yet widely represented in clinical trials."}
-                  </p>
-                </div>
-              )}
-            </Section>
-          )}
-
-          {/* Key Publications */}
-          {d.publications?.length > 0 && (
+          {/* Key Publications - Native Pipeline Feed */}
+          {msg.sources?.filter(s => s.type === 'publication').length > 0 && (
             <Section icon={BookOpen} iconColor="text-primary" label="Key Publications">
               <div className="space-y-2">
-                {d.publications.map((pub) => (
-                  <div key={pub.id}
+                {msg.sources.filter(s => s.type === 'publication').map((pub, idx) => (
+                  <div key={idx}
                     onClick={() => setActiveDetail({ ...pub, type: 'publication' })}
                     className="bg-surface border border-outline-variant/20 rounded-xl p-3 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all group">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="flex-none w-7 h-5 rounded bg-primary text-white text-[9px] font-bold flex items-center justify-center">{pub.id}</span>
-                        <h4 className="text-sm font-semibold group-hover:text-primary transition-colors line-clamp-2">{pub.title} ({pub.year})</h4>
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-1">
+                      <div className="flex items-start gap-2">
+                        <span className="flex-none w-6 h-5 rounded bg-primary text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
+                        <h4 className="text-sm font-semibold group-hover:text-primary transition-colors">{pub.title} ({pub.year || 'N/A'})</h4>
                       </div>
                     </div>
-                    <p className="text-xs text-on-surface-variant ml-9">{pub.key_finding}</p>
-                    {pub.why_it_matters && (
-                      <p className="text-[11px] text-primary/80 ml-9 mt-1 italic">{pub.why_it_matters}</p>
-                    )}
+                    <p className="text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1">{pub.snippet || pub.abstract || 'No abstract available.'}</p>
                   </div>
                 ))}
               </div>
             </Section>
           )}
 
-          {/* Limitations */}
-          {d.limitations && (
-            <Section icon={AlertTriangle} iconColor="text-warning" label="Limitations & Considerations">
-              <p className="text-xs text-on-surface-variant leading-relaxed italic">{d.limitations}</p>
+          {/* Clinical Trials - Native Pipeline Feed */}
+          {msg.sources?.filter(s => s.type === 'clinical_trial').length > 0 && (
+            <Section icon={FlaskConical} iconColor="text-secondary" label="Clinical Trials">
+              <div className="space-y-2">
+                {msg.sources.filter(s => s.type === 'clinical_trial').map((trial, idx) => (
+                  <div key={idx}
+                    onClick={() => setActiveDetail({ ...trial, type: 'trial' })}
+                    className="bg-surface border border-outline-variant/20 rounded-xl p-3 cursor-pointer hover:border-secondary/40 hover:shadow-sm transition-all group">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="flex-none w-6 h-5 rounded bg-secondary text-white text-[10px] font-bold flex items-center justify-center">{idx + 1}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex-none ${trial.status?.toLowerCase().includes('recruiting') && !trial.status?.toLowerCase().includes('not') ? 'bg-secondary-container/40 text-secondary' : trial.status?.toLowerCase().includes('completed') ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+                        {trial.status || 'Unknown Status'}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-semibold group-hover:text-secondary transition-colors ml-8">{trial.title}</h4>
+                    <p className="text-xs text-on-surface-variant ml-8 line-clamp-2 mt-1">{trial.abstract || trial.eligibility || 'Details inside.'}</p>
+                  </div>
+                ))}
+              </div>
             </Section>
           )}
 
@@ -401,10 +354,13 @@ const MainApplication = () => {
 
         {showExtras && (
           <div className="flex-none px-4 mx-auto w-full animate-fade-in relative z-10">
-            <div className="max-w-3xl mx-auto flex flex-col md:flex-row gap-2 mb-2 p-3 bg-surface border border-outline-variant/40 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] relative">
-              <input type="text" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Patient (optional)" disabled={isProcessing} className="input-field text-sm flex-1 w-full md:w-auto mb-2 md:mb-0" />
-              <input type="text" value={diseaseInput} onChange={e => setDiseaseInput(e.target.value)} placeholder="Condition" disabled={isProcessing} className="input-field text-sm flex-1 w-full md:w-auto" />
-              <button type="button" onClick={() => setShowExtras(false)} className="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors absolute right-2 top-2 md:relative md:top-auto md:right-auto"><ChevronUp size={16} /></button>
+            <div className="max-w-3xl mx-auto flex flex-col gap-3 mb-2 p-4 bg-surface border border-outline-variant/40 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] relative">
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-xs font-bold text-outline uppercase tracking-wider">Patient Context</span>
+                <button type="button" onClick={() => setShowExtras(false)} className="p-1 rounded-lg hover:bg-surface-container text-outline"><ChevronUp size={16} /></button>
+              </div>
+              <input type="text" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Patient (optional)" disabled={isProcessing} className="input-field text-sm w-full" />
+              <input type="text" value={diseaseInput} onChange={e => setDiseaseInput(e.target.value)} placeholder="Condition" disabled={isProcessing} className="input-field text-sm w-full" />
             </div>
           </div>
         )}
