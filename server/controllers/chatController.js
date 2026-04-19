@@ -402,7 +402,8 @@ exports.processStructuredChatStream = async (req, res) => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`🗣️  Structured Input STREAM: Disease="${disease}", Query="${query}", Location="${location}"`);
 
-    const intent = llmService._detectIntent(userMessage, conversation.messages);
+    // FIX: Detect intent on the RAW query/content, not the formatted userMessage which contains context labels
+    const intent = llmService._detectIntent(query || disease || '', conversation.messages);
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 

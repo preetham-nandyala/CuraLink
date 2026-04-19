@@ -88,8 +88,11 @@ Output:`;
     const medKeywords = ["treatment", "symptoms", "causes", "overview", "management", "risk factors", "diagnosis", "dosage"];
 
     // Non-medical heuristic
-    const commonNonMed = ["hello", "hi", "how are you", "what's the weather", "who are you", "tell me a joke"];
-    if (commonNonMed.some(k => q.startsWith(k)) && !q.includes("cancer") && !q.includes("disease")) return 'NON_MEDICAL';
+    const commonNonMed = ["hello", "hi", "how are you", "what's the weather", "who are you", "tell me a joke", "thank you", "thanks"];
+    if (commonNonMed.some(k => q.startsWith(k))) {
+       // If it starts with common non-med, it's non-med unless it's a very specific long medical question
+       if (q.length < 50) return 'NON_MEDICAL';
+    }
 
     if (pubKeywords.some(k => q.includes(k))) return 'PUBLICATIONS';
     if (trialKeywords.some(k => q.includes(k))) return 'CLINICAL_TRIALS';
