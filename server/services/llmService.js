@@ -79,22 +79,33 @@ Output:`;
     }
   }
 
-  async validateMedicalIntent(userQuery) {
+  async validateMedicalIntent(userQuery, conversationHistory = []) {
     const q = (userQuery || '').toLowerCase().trim();
     
-    // Hard-coded fast path for common debris
+    // Hard-coded fast path for common debris (only when NO conversation context)
     const trivial = ["hi", "hello", "hey", "test", "thanks", "thank you", "how are you", "who are you"];
-    if (trivial.includes(q)) return 'NON_MEDICAL';
+    if (trivial.includes(q) && conversationHistory.length === 0) return 'NON_MEDICAL';
 
-    // LLM validation for everything else
+    // If there's conversation history, build context summary for the LLM
+    let contextHint = '';
+    if (conversationHistory.length > 0) {
+      const recentMessages = conversationHistory.slice(-4).map(m => {
+        const content = typeof m.content === 'string' ? m.content.substring(0, 100) : '';
+        return `${m.role}: "${content}"`;
+      }).join('\n');
+      contextHint = `\nConversation history (for context):\n${recentMessages}\n`;
+    }
+
+    // LLM validation with context awareness
     const prompt = `Act as a strict gatekeeper for a medical research platform.
 Is the following query related to medical research, diseases, treatments, or clinical trials?
-
-Query: "${userQuery}"
+${contextHint}
+Current query: "${userQuery}"
 
 Rules:
-- If it is a greeting, small talk, general knowledge (history, geography), non-medical technology, math, or physics, return "NON_MEDICAL".
+- If it is a greeting, small talk, general knowledge (history, geography), non-medical technology, math, or physics AND there is no medical conversation context, return "NON_MEDICAL".
 - If it is about a disease, symptom, medication, clinical trial, or medical study, return "MEDICAL".
+- IMPORTANT: If the query is a follow-up to a previous medical conversation (e.g. "in india", "what about stage 3", "show me more"), it IS medical. Return "MEDICAL".
 
 Output ONLY the word "MEDICAL" or "NON_MEDICAL". No explanation.`;
 
@@ -106,10 +117,12 @@ Output ONLY the word "MEDICAL" or "NON_MEDICAL". No explanation.`;
         temperature: 0,
       });
       const res = completion.choices[0]?.message?.content?.trim().toUpperCase();
-      console.log(`🛡️  GATEKEEPER: "${userQuery}" -> ${res}`);
+      console.log(`🛡️  GATEKEEPER: "${userQuery}" -> ${res} (history: ${conversationHistory.length} msgs)`);
       return res.includes('MEDICAL') && !res.includes('NON_') ? 'MEDICAL' : 'NON_MEDICAL';
     } catch (err) {
       console.warn('⚠️ Gatekeeper LLM error:', err.message);
+      // If there's conversation context, assume it's a follow-up → MEDICAL
+      if (conversationHistory.length > 0) return 'MEDICAL';
       return this._detectIntent(userQuery);
     }
   }

@@ -54,8 +54,8 @@ exports.processChat = async (req, res) => {
       location: conversation.userProfile?.location || '',
     };
 
-    // Step 1: LLM validates intent and minimizes the query simultaneously
-    const intent = await llmService.validateMedicalIntent(message);
+    // Step 1: LLM validates intent with conversation context for follow-up awareness
+    const intent = await llmService.validateMedicalIntent(message, conversation.messages || []);
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 
@@ -232,8 +232,8 @@ exports.processStructuredChat = async (req, res) => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`🗣️  Raw Input: Disease="${disease}", Query="${query}", Location="${location}"`);
 
-    // ===== GATEKEEPER: LLM Intent Validation =====
-    const intent = await llmService.validateMedicalIntent(query || disease || '');
+    // ===== GATEKEEPER: LLM Intent Validation (context-aware for follow-ups) =====
+    const intent = await llmService.validateMedicalIntent(query || disease || '', conversation.messages || []);
 
     let rankedPublications = [], rankedTrials = [], expandedQuery = null, retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let llmResponse;
@@ -427,8 +427,8 @@ exports.processStructuredChatStream = async (req, res) => {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`🗣️  Structured Input STREAM: Disease="${disease}", Query="${query}", Location="${location}"`);
 
-    // FIX: Detect intent on the RAW query, then LLM-minimize for precision
-    const intent = await llmService.validateMedicalIntent(query || disease || '');
+    // FIX: Detect intent on the RAW query, context-aware for follow-ups
+    const intent = await llmService.validateMedicalIntent(query || disease || '', conversation.messages || []);
     let publications = [], trials = [], rankedPublications = [], rankedTrials = [], retrievalMeta = { totalRetrieved: 0, retrievalTimeMs: 0 };
     let expandedQuery = null;
 
