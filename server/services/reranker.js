@@ -97,8 +97,12 @@ class Reranker {
     publications.forEach((pub, i) => {
       const titleAbs = (`${pub.title || ''} ${pub.abstract || ''}`).toLowerCase();
       
-      // 2. Hard Keyword Guard (Pre-Filter) + Abstract Requirement
+      // 2. Hard Keyword Guard (Pre-Filter) + Abstract Requirement + Medical Jargon Guard
       if (!pub.abstract || pub.abstract.trim().length === 0) return; // Drop if no abstract
+
+      // Drop theoretical physics/math jargon often returned by word-ambiguity
+      const nonMedJargon = ['ad-s', 'anti-de sitter', 'quantum gravity', 'string theory', 'de rham', 'mathematical physics', 'logic', 'computational complexity'];
+      if (nonMedJargon.some(j => titleAbs.includes(j))) return;
 
       if (protectedTerms.length > 0) {
         const hasKeyword = protectedTerms.some(term => titleAbs.includes(term));

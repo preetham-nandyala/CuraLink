@@ -80,7 +80,8 @@ Output:`;
   }
 
   _detectIntent(query, history = []) {
-    const q = query.toLowerCase();
+    const q = (query || '').toLowerCase().trim();
+    if (!q) return 'NON_MEDICAL';
     
     // Intent Classification Keywords
     const pubKeywords = ["paper", "research", "publication", "study", "journal", "evidence", "latest research", "literature"];
@@ -88,11 +89,15 @@ Output:`;
     const medKeywords = ["treatment", "symptoms", "causes", "overview", "management", "risk factors", "diagnosis", "dosage"];
 
     // Non-medical heuristic
-    const commonNonMed = ["hello", "hi", "how are you", "what's the weather", "who are you", "tell me a joke", "thank you", "thanks"];
-    if (commonNonMed.some(k => q.startsWith(k))) {
+    const commonNonMed = ["hello", "hi", "how are you", "what's the weather", "who are you", "tell me a joke", "thank you", "thanks", "hey", "test"];
+    if (commonNonMed.some(k => q === k || q.startsWith(k + ' '))) {
        // If it starts with common non-med, it's non-med unless it's a very specific long medical question
        if (q.length < 50) return 'NON_MEDICAL';
     }
+
+    // Blacklist specific non-medical jargon often returned by generic queries
+    const blacklist = ["string theory", "anti-de sitter", "de rham", "p-adic", "computational complexity", "double copy"];
+    if (blacklist.some(k => q.includes(k))) return 'NON_MEDICAL';
 
     if (pubKeywords.some(k => q.includes(k))) return 'PUBLICATIONS';
     if (trialKeywords.some(k => q.includes(k))) return 'CLINICAL_TRIALS';
