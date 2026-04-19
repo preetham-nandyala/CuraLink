@@ -26,7 +26,7 @@ const Register = () => {
     setError('');
     setLoading(true);
     try {
-      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const API = import.meta.env.VITE_API_URL;
       await axios.post(`${API}/auth/send-otp`, { email });
       setSuccess('Verification code sent to your email.');
       setStep(2);

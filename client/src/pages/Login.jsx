@@ -45,7 +45,7 @@ const Login = () => {
     setResetError('');
     setResetLoading(true);
     try {
-      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const API = import.meta.env.VITE_API_URL;
       await axios.post(`${API}/auth/forgot-password`, { email: resetEmail });
       setResetStep(2);
     } catch (err) {
@@ -76,7 +76,7 @@ const Login = () => {
     setResetError('');
     setResetLoading(true);
     try {
-      const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const API = import.meta.env.VITE_API_URL;
       await axios.post(`${API}/auth/reset-password`, { 
         email: resetEmail, 
         otp: resetOtp, 

@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = async (email, password) => {
-    const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const API = import.meta.env.VITE_API_URL;
     const { data } = await axios.post(`${API}/auth/login`, { email, password });
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     setUser(data);
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password, otp) => {
-    const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const API = import.meta.env.VITE_API_URL;
     const { data } = await axios.post(`${API}/auth/register`, { name, email, password, otp });
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     setUser(data);
