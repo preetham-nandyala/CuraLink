@@ -97,7 +97,9 @@ class Reranker {
     publications.forEach((pub, i) => {
       const titleAbs = (`${pub.title || ''} ${pub.abstract || ''}`).toLowerCase();
       
-      // 2. Hard Keyword Guard (Pre-Filter)
+      // 2. Hard Keyword Guard (Pre-Filter) + Abstract Requirement
+      if (!pub.abstract || pub.abstract.trim().length === 0) return; // Drop if no abstract
+
       if (protectedTerms.length > 0) {
         const hasKeyword = protectedTerms.some(term => titleAbs.includes(term));
         if (!hasKeyword) return; // Drop completely
