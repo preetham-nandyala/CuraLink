@@ -125,7 +125,7 @@ const MainApplication = () => {
       console.error(err);
       setMessages(prev => [...prev, {
         role: 'assistant', id: Date.now() + 1, isError: true,
-        content: { conditionOverview: 'Something went wrong. Please try again.' },
+        content: { conditionOverview: 'Our servers are currently experiencing high load. Please try again after some time.' },
       }]);
     } finally {
       timers.forEach(clearTimeout); setIsProcessing(false); setStatus('');

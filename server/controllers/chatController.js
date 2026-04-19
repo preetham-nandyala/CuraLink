@@ -269,7 +269,7 @@ exports.processStructuredChat = async (req, res) => {
         publications: rankedPublications,
         trials: rankedTrials,
         context: conversation.context,
-        history: conversation.messages.slice(-6),
+        history: conversation.messages.slice(-5),
         queryInfo: expandedQuery,
       });
 
@@ -377,7 +377,7 @@ exports.processStructuredChat = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Structured chat error:', error);
-    res.status(500).json({ error: 'Failed to process your query. Please try again.' });
+    res.status(500).json({ error: 'Our servers are currently experiencing high load. Please try again after some time.' });
   }
 };
 
@@ -488,7 +488,7 @@ exports.processStructuredChatStream = async (req, res) => {
       publications: rankedPublications,
       trials: rankedTrials,
       context: conversation.context,
-      history: conversation.messages.slice(-6),
+      history: conversation.messages.slice(-5),
       queryInfo: expandedQuery,
       res,
       intent // Pass the gated intent
@@ -527,9 +527,9 @@ exports.processStructuredChatStream = async (req, res) => {
   } catch (error) {
     console.error('❌ Structured chat STREAMing error:', error);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Failed to process your query. Please try again.' });
+      res.status(500).json({ error: 'Our servers are currently experiencing high load. Please try again after some time.' });
     } else {
-      res.write(`data: ${JSON.stringify({ error: 'Stream interrupted due to server error' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: 'Our servers are currently experiencing high load. Please try again after some time.' })}\n\n`);
       res.end();
     }
   }

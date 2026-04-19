@@ -88,15 +88,8 @@ class OpenAlexService {
     return `title:${titleFingerprint}_${item.year || 'unknown'}`;
   }
 
-  /**
-   * Choose publication date filter based on query content.
-   * Established neurological/genetic conditions have critical older literature;
-   * fast-moving fields (oncology, COVID, AI-medicine) benefit from recency bias.
-   */
   _getDateFilter(search) {
-    const lower = (search || '').toLowerCase();
-    const isEstablished = ESTABLISHED_DISEASE_PATTERNS.some(pattern => lower.includes(pattern));
-    return isEstablished ? 'from_publication_date:2010-01-01' : 'from_publication_date:2018-01-01';
+    return 'from_publication_date:2020-01-01';
   }
 
   /**

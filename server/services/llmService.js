@@ -9,9 +9,9 @@ const { LLM_TEMPERATURE, LLM_MAX_TOKENS } = require('../config/constants');
  */
 class LLMService {
   constructor() {
-    this.groq1 = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    this.groq1 = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 30000 });
     // Use second key if available, otherwise fallback to the first key
-    this.groq2 = new Groq({ apiKey: process.env.GROQ_API_KEY_2 || process.env.GROQ_API_KEY });
+    this.groq2 = new Groq({ apiKey: process.env.GROQ_API_KEY_2 || process.env.GROQ_API_KEY, timeout: 30000 });
     this.model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
   }
 
@@ -245,17 +245,12 @@ MANDATORY JSON SCHEMA:
   }
 
   _systemPrompt(intent) {
-    return `You are a medical research assistant. Base ALL claims only on the provided research data.
-Never hallucinate. If data is insufficient, say so clearly.
-Always cite the source title when making a claim.
-Format response as valid JSON only, no markdown, no prose outside JSON.
-
-MANDATORY JSON SCHEMA:
+    return `You are a medical research assistant. Answer ONLY based on provided research.
+never hallucinate. cite source titles when making claims.
+Respond ONLY in valid JSON matching this schema:
 {
   "conditionOverview": "string",
-  "researchInsights": [
-    { "finding": "string", "sourcePMID": "string", "confidence": "high|medium|low" }
-  ],
+  "researchInsights": [{ "finding": "string", "sourcePMID": "string", "confidence": "high|medium|low" }],
   "clinicalTrialsSummary": "string",
   "personalizedRecommendation": "string",
   "followUpSuggestions": ["string", "string", "string"]
@@ -300,10 +295,10 @@ MANDATORY JSON SCHEMA:
 
   _fallbackResponse(publications, trials) {
     return JSON.stringify({
-      conditionOverview: 'Synthesis failed. Showing raw retrieval results.',
-      researchInsights: [{ finding: 'Data available in sources below.', sourcePMID: '', confidence: 'low' }],
-      clinicalTrialsSummary: 'Fallback text.',
-      personalizedRecommendation: 'Please review raw findings.',
+      conditionOverview: 'Our servers are currently experiencing high load. Please try again after some time.',
+      researchInsights: [],
+      clinicalTrialsSummary: '',
+      personalizedRecommendation: '',
       followUpSuggestions: []
     });
   }
