@@ -10,7 +10,7 @@ class BrevoService {
   async sendOtpEmail(toEmail, toName, otp) {
     if (!this.apiKey) {
       console.warn('⚠️ No Brevo API Key found. Skipping email send. OTP is:', otp);
-      return true; // Pretend it works for local testing
+      return { success: true }; // Pretend it works for local testing
     }
 
     try {
@@ -40,10 +40,11 @@ class BrevoService {
           },
         }
       );
-      return true;
+      return { success: true };
     } catch (error) {
-      console.error('Brevo Email Error:', error.response?.data || error.message);
-      return false;
+      const errorMsg = error.response?.data?.message || error.message;
+      console.error('Brevo Email Error:', errorMsg);
+      return { success: false, error: errorMsg };
     }
   }
 }

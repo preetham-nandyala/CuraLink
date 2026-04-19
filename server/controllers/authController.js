@@ -20,8 +20,10 @@ exports.sendRegisterOtp = async (req, res) => {
     await Otp.deleteMany({ email }); // clear old
     await Otp.create({ email, otp });
 
-    const emailSent = await brevoService.sendOtpEmail(email, name, otp);
-    if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
+    const result = await brevoService.sendOtpEmail(email, name, otp);
+    if (!result.success) {
+      return res.status(500).json({ message: `Email failed. Brevo says: ${result.error || 'Unknown error'}` });
+    }
 
     res.json({ message: 'OTP sent to email' });
   } catch (error) {
@@ -86,8 +88,10 @@ exports.sendForgotPasswordOtp = async (req, res) => {
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp });
 
-    const emailSent = await brevoService.sendOtpEmail(email, user.name, otp);
-    if (!emailSent) return res.status(500).json({ message: 'Failed to send OTP email' });
+    const result = await brevoService.sendOtpEmail(email, user.name, otp);
+    if (!result.success) {
+      return res.status(500).json({ message: `Email failed. Brevo says: ${result.error || 'Unknown error'}` });
+    }
 
     res.json({ message: 'Password reset OTP sent to email' });
   } catch (error) {
