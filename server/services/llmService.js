@@ -138,6 +138,10 @@ MANDATORY JSON SCHEMA:
 
     // --- PROMPT 2: CLINICAL STATUS ENGINE ---
     const sysPrompt2 = `You are a Clinical Trials Synthesizer. Focus purely on the clinical/experimental pipeline status. Base ALL claims ONLY on the provided trials data. No prose outside JSON.
+
+STRICT RULE: followUpSuggestions MUST be related to scientific research, clinical trials, or medical publications only.
+Examples of good follow-ups: "Latest treatment for lung cancer", "Clinical trials for diabetes", "Recent studies on Alzheimer's".
+
 MANDATORY JSON SCHEMA:
 {
   "clinicalTrialsSummary": "string",
