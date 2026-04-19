@@ -195,37 +195,7 @@ const MainApplication = () => {
             </Section>
           )}
 
-          {/* Clinical Trials Summary */}
-          {d.clinicalTrialsSummary && (
-            <Section icon={FlaskConical} iconColor="text-secondary" label="Clinical Trials Summary">
-              <div className="text-sm text-on-surface-variant leading-relaxed border-l-2 border-secondary/30 pl-3 py-1">
-                <ReactMarkdown>{d.clinicalTrialsSummary}</ReactMarkdown>
-              </div>
-            </Section>
-          )}
 
-          {/* Personalized Recommendation */}
-          {d.personalizedRecommendation && (
-            <Section icon={Heart} iconColor="text-error" label="Personalized Recommendation">
-               <div className="text-sm text-on-surface-variant leading-relaxed bg-primary/[0.03] border border-primary/10 pl-3 py-3 rounded-lg markdown-body relative shadow-sm">
-                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-error rounded-l-lg" />
-                 <ReactMarkdown>{d.personalizedRecommendation}</ReactMarkdown>
-               </div>
-            </Section>
-          )}
-
-          {/* Follow Up Suggestions */}
-          {d.followUpSuggestions?.length > 0 && (
-            <Section icon={Compass} iconColor="text-outline" label="Follow Up Suggestions">
-               <div className="flex flex-wrap gap-2">
-                 {d.followUpSuggestions.map((sug, i) => (
-                   <span key={i} onClick={() => { setInputVal(sug); inputRef.current?.focus(); }} className="cursor-pointer text-[11px] font-medium text-primary bg-primary/5 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5">
-                     <TrendingUp size={10} /> {sug}
-                   </span>
-                 ))}
-               </div>
-            </Section>
-          )}
 
           {/* Key Publications - Native Pipeline Feed */}
           {msg.sources?.filter(s => s.type === 'publication').length > 0 && (
@@ -267,6 +237,38 @@ const MainApplication = () => {
                   </div>
                 ))}
               </div>
+            </Section>
+          )}
+
+          {/* Clinical Trials Summary */}
+          {d.clinicalTrialsSummary && (
+            <Section icon={FlaskConical} iconColor="text-secondary" label="Clinical Trials Summary">
+              <div className="text-sm text-on-surface-variant leading-relaxed border-l-2 border-secondary/30 pl-3 py-1">
+                <ReactMarkdown>{d.clinicalTrialsSummary}</ReactMarkdown>
+              </div>
+            </Section>
+          )}
+
+          {/* Personalized Recommendation */}
+          {d.personalizedRecommendation && (
+            <Section icon={Heart} iconColor="text-error" label="Personalized Recommendation">
+               <div className="text-sm text-on-surface-variant leading-relaxed bg-primary/[0.03] border border-primary/10 pl-3 py-3 rounded-lg markdown-body relative shadow-sm">
+                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-error rounded-l-lg" />
+                 <ReactMarkdown>{d.personalizedRecommendation}</ReactMarkdown>
+               </div>
+            </Section>
+          )}
+
+          {/* Follow Up Suggestions */}
+          {d.followUpSuggestions?.length > 0 && (
+            <Section icon={Compass} iconColor="text-outline" label="Follow Up Suggestions">
+               <div className="flex flex-wrap gap-2">
+                 {d.followUpSuggestions.map((sug, i) => (
+                   <span key={i} onClick={() => { setInputVal(sug); inputRef.current?.focus(); }} className="cursor-pointer text-[11px] font-medium text-primary bg-primary/5 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5">
+                     <TrendingUp size={10} /> {sug}
+                   </span>
+                 ))}
+               </div>
             </Section>
           )}
 
