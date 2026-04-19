@@ -145,27 +145,28 @@ const Register = () => {
       </div>
 
       {/* Right side */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 lg:p-24 bg-surface-container-lowest overflow-y-auto relative">
-        <div className="lg:hidden flex items-center gap-3 absolute top-8 left-8">
-          <span className="material-symbols-outlined fill-icon text-3xl text-primary">biotech</span>
-          <span className="font-headline font-extrabold text-xl tracking-tighter text-primary">Curalink</span>
-        </div>
+      <div className="w-full lg:w-1/2 bg-surface-container-lowest overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center justify-center p-8 sm:p-12 lg:p-24">
+          <div className="w-full max-w-md space-y-6 py-6">
+            <div className="lg:hidden flex items-center gap-3 mb-6">
+              <span className="material-symbols-outlined fill-icon text-3xl text-primary">biotech</span>
+              <span className="font-headline font-extrabold text-xl tracking-tighter text-primary">Curalink</span>
+            </div>
 
-        <div className="w-full max-w-md space-y-8 my-auto py-8">
-          {step === 2 && (
-            <button onClick={() => setStep(1)} className="mb-2 text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-sm font-medium">
-               <span className="material-symbols-outlined text-[16px]">arrow_back</span> Back
-            </button>
-          )}
+            {step === 2 && (
+              <button onClick={() => setStep(1)} className="mb-2 text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-sm font-medium">
+                 <span className="material-symbols-outlined text-[16px]">arrow_back</span> Back
+              </button>
+            )}
 
-          <div className="flex flex-col gap-2">
-            <h1 className="text-4xl font-headline font-bold text-primary tracking-tight">
-              {step === 1 ? 'Create account' : 'Verify Email'}
-            </h1>
-            <p className="text-on-surface-variant font-body text-sm mt-1">
-              {step === 1 ? 'Enter your details to access the research platform.' : `We sent a 6-digit code to ${formData.email}`}
-            </p>
-          </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-headline font-bold text-primary tracking-tight">
+                {step === 1 ? 'Create account' : 'Verify Email'}
+              </h1>
+              <p className="text-on-surface-variant font-body text-sm mt-1">
+                {step === 1 ? 'Enter your details to access the research platform.' : `We sent a 6-digit code to ${formData.email}`}
+              </p>
+            </div>
 
           {apiError && (
             <div className="p-3 bg-error-container border border-error/20 rounded-lg text-sm text-on-error-container font-medium text-center">

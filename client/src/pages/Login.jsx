@@ -81,18 +81,19 @@ const Login = () => {
       </div>
 
       {/* Right Side: Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 lg:p-24 bg-surface-container-lowest overflow-y-auto relative">
-        <div className="lg:hidden flex items-center gap-3 absolute top-8 left-8">
-          <span className="material-symbols-outlined fill-icon text-3xl text-primary">biotech</span>
-          <span className="font-headline font-extrabold text-xl tracking-tighter text-primary">Curalink</span>
-        </div>
-        
-        <div className="w-full max-w-md space-y-10 my-auto py-8">
-          {/* Header */}
-          <div className="space-y-2">
-            <h1 className="font-headline text-4xl font-bold tracking-tight text-primary">Welcome back</h1>
-            <p className="font-body text-on-surface-variant text-base">Sign in to continue your research protocol.</p>
-          </div>
+      <div className="w-full lg:w-1/2 bg-surface-container-lowest overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center justify-center p-8 sm:p-12 lg:p-24">
+          <div className="w-full max-w-md space-y-8 py-6">
+            <div className="lg:hidden flex items-center gap-3 mb-6">
+              <span className="material-symbols-outlined fill-icon text-3xl text-primary">biotech</span>
+              <span className="font-headline font-extrabold text-xl tracking-tighter text-primary">Curalink</span>
+            </div>
+            
+            {/* Header */}
+            <div className="space-y-2">
+              <h1 className="font-headline text-3xl font-bold tracking-tight text-primary">Welcome back</h1>
+              <p className="font-body text-on-surface-variant text-sm">Sign in to continue your research protocol.</p>
+            </div>
 
           {apiError && (
             <div className="p-3 bg-error-container border border-error/20 rounded-lg text-sm text-on-error-container font-medium text-center">
