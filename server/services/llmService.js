@@ -10,7 +10,7 @@ const { LLM_TEMPERATURE, LLM_MAX_TOKENS } = require('../config/constants');
 class LLMService {
   constructor() {
     this.groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    this.model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+    this.model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
   }
 
   async generateResponse({ userQuery, publications, trials, context, history, queryInfo }) {
@@ -162,49 +162,21 @@ Output:`;
   }
 
   _systemPrompt(intent) {
-    let focusRules = '';
-    
-    if (intent === 'PUBLICATIONS') {
-      focusRules = `
-### INTENT FOCUS: PUBLICATIONS (RESEARCH DASHBOARD MODE)
-- PRIMARY GOAL: Provide a deep literature review (80% weight).
-- PUBLICATIONS SECTION: Include 5-8 high-quality papers. Prioritize key findings.
-- CLINICAL TRIALS: Include ONLY if highly relevant (max 1-2).
-- OVERVIEW: Minimal medical overview (max 2 lines). Focus on research progress.`;
-    } else if (intent === 'CLINICAL_TRIALS') {
-      focusRules = `
-### INTENT FOCUS: CLINICAL TRIALS (EXPERIMENTAL DASHBOARD MODE)
-- PRIMARY GOAL: Highlight ongoing human studies (80% weight).
-- CLINICAL TRIALS SECTION: Include 5-8 trials. Focus on interventions and recruitment status.
-- PUBLICATIONS: Supporting evidence only.
-- OVERVIEW: Focus exclusively on the experimental landscape.`;
-    } else {
-      focusRules = `
-### INTENT FOCUS: GENERAL MEDICAL (BALANCED CARE MODE)
-- PRIMARY GOAL: Provide a comprehensive management overview.
-- BALANCE: Even weighting between Overview, Insights, Publications, and Trials.`;
-    }
-
-    return `You are an AI-powered Medical Research Assistant.
-${focusRules}
-
-STRICT RESPONSE RULES:
-- Read, synthesize, and explain. DO NOT list raw source data.
-- PRIORITY: Relevance > Quantity.
-- Use signal phrases: "Strong clinical evidence shows...", "Moderate evidence suggests...", "Emerging evidence indicates...", "Early-stage research explores...".
+    return `You are a medical research assistant. Base ALL claims only on the provided research data.
+Never hallucinate. If data is insufficient, say so clearly.
+Always cite the source title when making a claim.
+Format response as valid JSON only, no markdown, no prose outside JSON.
 
 MANDATORY JSON SCHEMA:
 {
-  "condition_overview": "Specific answer for ${intent}. Start with 'The most important treatments today are: '.",
-  "research_insights": ["Most impactful shift: ...", "Standard insight...", "Emerging insight...", "Experimental insight..."],
-  "key_takeaway": "Final 1-2 decisive sentences on the ${intent} landscape."
-}
-
-CRITICAL CONSTRAINTS:
-1. SGLT2: For heart/diabetes/kidney, MUST mention SGLT2 inhibitors.
-2. OVERVIEW: MUST begin with "The most important treatments today are:".
-3. ORDER: Standard-of-care BEFORE experimental in insights.
-4. CORE FACTORS: Always present the most common and clinically dominant factors first.`;
+  "conditionOverview": "string",
+  "researchInsights": [
+    { "finding": "string", "sourcePMID": "string", "confidence": "high|medium|low" }
+  ],
+  "clinicalTrialsSummary": "string",
+  "personalizedRecommendation": "string",
+  "followUpSuggestions": ["string", "string", "string"]
+}`;
   }
 
   _contextBlock(context, history) {
@@ -216,10 +188,11 @@ CRITICAL CONSTRAINTS:
       if (c.mutation) block += `* Mutation: ${c.mutation}\n`;
     }
     if (history?.length > 0) {
-      block += 'Conversation Summary:\n* ';
-      history.slice(-6).forEach(msg => {
-        if (msg.role === 'user') block += `User: "${msg.content.substring(0, 100)}"\n* `;
-        else if (msg.metadata?.aiSummary) block += `AI: "${msg.metadata.aiSummary.substring(0, 100)}"\n* `;
+      block += 'Conversation Summary (Last 5 exchanges):\n* ';
+      // Truncate to keep the last 5 EXCHANGES (approx 5-10 messages) for token efficiency
+      history.slice(-5).forEach(msg => {
+        if (msg.role === 'user') block += `User: "${msg.content.substring(0, 150)}"\n* `;
+        else if (msg.metadata?.aiSummary) block += `AI: "${msg.metadata.aiSummary.substring(0, 150)}"\n* `;
       });
     }
     return block;
@@ -244,10 +217,11 @@ CRITICAL CONSTRAINTS:
 
   _fallbackResponse(publications, trials) {
     return JSON.stringify({
-      condition_overview: 'Synthesis failed. Showing raw retrieval results.',
-      research_insights: ['Data available in sources below.'],
-      publications: (publications || []).slice(0, 3),
-      clinical_trials: (trials || []).slice(0, 3)
+      conditionOverview: 'Synthesis failed. Showing raw retrieval results.',
+      researchInsights: [{ finding: 'Data available in sources below.', sourcePMID: '', confidence: 'low' }],
+      clinicalTrialsSummary: 'Fallback text.',
+      personalizedRecommendation: 'Please review raw findings.',
+      followUpSuggestions: []
     });
   }
 

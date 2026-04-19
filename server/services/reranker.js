@@ -182,9 +182,9 @@ class Reranker {
     if (pubsDiscarded > 0) console.log(`   🗑️  Discarded ${pubsDiscarded} publications below threshold`);
     if (trialsDiscarded > 0) console.log(`   🗑️  Discarded ${trialsDiscarded} trials below threshold`);
 
-    // Top-K Strictness & Token Protection: Cap fiercely to avoid Groq 8000 TPM limit
-    let rankedPubs = filteredPubs.slice(0, 4);
-    let rankedTrials = filteredTrials.slice(0, 2);
+    // Top-K Strictness: Output 6 publications and 5 clinical trials to match prompt expectations
+    let rankedPubs = filteredPubs.slice(0, 6);
+    let rankedTrials = filteredTrials.slice(0, 5);
 
     // TRUNCATE ABSTRACTS TO PROTECT LLM TOKEN LIMITS
     rankedPubs = rankedPubs.map(pub => {

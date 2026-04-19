@@ -61,7 +61,7 @@ const MainApplication = () => {
         if (m.role === 'assistant') {
           let content;
           try { content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content; }
-          catch { content = { condition_overview: m.content }; }
+          catch { content = { conditionOverview: m.content || '' }; }
           return { role: 'assistant', content, sources: m.sources, metadata: m.metadata, id: i };
         }
         return { role: 'user', content: m.content, id: i };
@@ -113,7 +113,7 @@ const MainApplication = () => {
 
       let parsed;
       try { parsed = JSON.parse(data.message.content); }
-      catch { parsed = { condition_overview: data.message.content }; }
+      catch { parsed = { conditionOverview: data.message.content || 'Synthesis completed.' }; }
 
       setMessages(prev => [...prev, {
         role: 'assistant', content: parsed,
@@ -125,7 +125,7 @@ const MainApplication = () => {
       console.error(err);
       setMessages(prev => [...prev, {
         role: 'assistant', id: Date.now() + 1, isError: true,
-        content: { condition_overview: 'Something went wrong. Please try again.' },
+        content: { conditionOverview: 'Something went wrong. Please try again.' },
       }]);
     } finally {
       timers.forEach(clearTimeout); setIsProcessing(false); setStatus('');
@@ -166,7 +166,7 @@ const MainApplication = () => {
           <div className="flex-1 min-w-0">
             <Section icon={Stethoscope} iconColor="text-primary" label="Condition Overview">
               <div className="text-sm text-on-surface-variant leading-relaxed markdown-body">
-                <ReactMarkdown>{d.condition_overview || ''}</ReactMarkdown>
+                <ReactMarkdown>{d.conditionOverview || d.condition_overview || ''}</ReactMarkdown>
               </div>
             </Section>
           </div>
@@ -174,25 +174,56 @@ const MainApplication = () => {
 
         <div className="ml-11">
           {/* Research Insights */}
-          {d.research_insights?.length > 0 && (
+          {d.researchInsights?.length > 0 && (
             <Section icon={Lightbulb} iconColor="text-tertiary" label="Research Insights">
-              <ul className="space-y-1.5">
-                {d.research_insights.map((insight, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-on-surface-variant leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-tertiary flex-none mt-2" />
-                    {insight}
+              <ul className="space-y-3">
+                {d.researchInsights.map((insight, i) => (
+                  <li key={i} className="flex flex-col gap-1 text-sm text-on-surface-variant leading-relaxed bg-surface hover:bg-surface-container transition-colors rounded-xl border border-outline-variant/20 p-3">
+                    <div className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-tertiary flex-none mt-2" />
+                      <span>{insight.finding || insight}</span>
+                    </div>
+                    {(insight.sourcePMID || insight.confidence) && (
+                      <div className="ml-3 mt-1 flex items-center gap-2 text-[10px] font-bold">
+                        {insight.sourcePMID && <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">PMID: {insight.sourcePMID}</span>}
+                        {insight.confidence && <span className={`px-1.5 py-0.5 rounded uppercase border ${insight.confidence.toLowerCase() === 'high' ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-tertiary/10 text-tertiary border-tertiary/20'}`}>{insight.confidence} Confidence</span>}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
             </Section>
           )}
 
-          {/* Key Takeaway */}
-          {d.key_takeaway && (
-            <Section icon={Compass} iconColor="text-primary" label="Key Takeaway">
-              <div className="bg-primary/[0.06] border border-primary/20 rounded-xl p-4">
-                <p className="text-sm font-medium text-on-surface leading-relaxed">{d.key_takeaway}</p>
+          {/* Clinical Trials Summary */}
+          {d.clinicalTrialsSummary && (
+            <Section icon={FlaskConical} iconColor="text-secondary" label="Clinical Trials Summary">
+              <div className="text-sm text-on-surface-variant leading-relaxed border-l-2 border-secondary/30 pl-3 py-1">
+                <ReactMarkdown>{d.clinicalTrialsSummary}</ReactMarkdown>
               </div>
+            </Section>
+          )}
+
+          {/* Personalized Recommendation */}
+          {d.personalizedRecommendation && (
+            <Section icon={Heart} iconColor="text-error" label="Personalized Recommendation">
+               <div className="text-sm text-on-surface-variant leading-relaxed bg-primary/[0.03] border border-primary/10 pl-3 py-3 rounded-lg markdown-body relative shadow-sm">
+                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-error rounded-l-lg" />
+                 <ReactMarkdown>{d.personalizedRecommendation}</ReactMarkdown>
+               </div>
+            </Section>
+          )}
+
+          {/* Follow Up Suggestions */}
+          {d.followUpSuggestions?.length > 0 && (
+            <Section icon={Compass} iconColor="text-outline" label="Follow Up Suggestions">
+               <div className="flex flex-wrap gap-2">
+                 {d.followUpSuggestions.map((sug, i) => (
+                   <span key={i} onClick={() => { setInputVal(sug); inputRef.current?.focus(); }} className="cursor-pointer text-[11px] font-medium text-primary bg-primary/5 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5">
+                     <TrendingUp size={10} /> {sug}
+                   </span>
+                 ))}
+               </div>
             </Section>
           )}
 

@@ -450,8 +450,7 @@ exports.processStructuredChatStream = async (req, res) => {
     let aiSummary = 'Patient discussing ' + (disease || 'medical condition');
     try {
       const parsed = JSON.parse(llmResponse);
-      if (parsed.key_takeaway) aiSummary = parsed.key_takeaway;
-      else if (parsed.condition_overview) aiSummary = parsed.condition_overview.substring(0, 100) + '...';
+      if (parsed.conditionOverview) aiSummary = parsed.conditionOverview.substring(0, 100) + '...';
     } catch (e) {
       console.log('JSON parse failed for summary extraction (likely stream interrupt)');
     }
