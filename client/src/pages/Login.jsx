@@ -70,10 +70,10 @@ const Login = () => {
             </div>
           </div>
           <div className="max-w-lg mb-8">
-            <h2 className="font-headline text-[3.5rem] leading-tight font-light tracking-[-0.02em] mb-6 text-white drop-shadow-md">
+            <h2 className="font-headline text-3xl md:text-4xl leading-tight font-light tracking-[-0.02em] mb-4 text-white drop-shadow-md">
               Surgical Precision in Data.
             </h2>
-            <p className="font-body text-lg text-white/80 font-light leading-relaxed backdrop-blur-sm bg-primary/20 p-6 rounded-xl border-l-4 border-tertiary-fixed shadow-[0px_24px_48px_rgba(0,55,120,0.1)]">
+            <p className="font-body text-sm md:text-base text-white/80 font-light leading-relaxed backdrop-blur-sm bg-primary/20 p-4 lg:p-6 rounded-xl border-l-4 border-tertiary-fixed shadow-[0px_24px_48px_rgba(0,55,120,0.1)]">
               Empowering lead oncologists and researchers with fluid, ethereal artificial intelligence to unearth breakthroughs in medical science.
             </p>
           </div>
@@ -181,9 +181,10 @@ const Login = () => {
           {/* Footer Link */}
           <div className="text-center pt-4">
             <p className="font-body text-sm text-on-surface-variant">
-              Don't have an account? 
+              Don&apos;t have an account? 
               <button type="button" onClick={() => navigate('/register')} className="font-medium text-primary hover:text-primary-container transition-colors ml-1">Request Access</button>
             </p>
+          </div>
           </div>
         </div>
       </div>

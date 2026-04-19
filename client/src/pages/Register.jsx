@@ -133,8 +133,8 @@ const Register = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary-container/40 mix-blend-multiply"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low/90 via-transparent to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12 z-10 text-white">
-          <h2 className="font-headline text-4xl font-bold tracking-tight mb-4 drop-shadow-md">Surgical Precision in Data.</h2>
-          <p className="font-body text-lg text-primary-fixed-dim drop-shadow-sm max-w-md">Join the leading network of oncologists and researchers utilizing AI-driven insights to accelerate clinical trials.</p>
+          <h2 className="font-headline text-3xl font-bold tracking-tight mb-3 drop-shadow-md">Surgical Precision in Data.</h2>
+          <p className="font-body text-base text-primary-fixed-dim drop-shadow-sm max-w-md">Join the leading network of oncologists and researchers utilizing AI-driven insights to accelerate clinical trials.</p>
         </div>
         <div className="absolute top-12 left-12 z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-lowest/20 backdrop-blur-md border border-white/10">
@@ -341,6 +341,7 @@ const Register = () => {
             Already have an account? 
             <button type="button" onClick={() => navigate('/login')} className="font-medium text-primary hover:text-primary-container transition-colors ml-1">Sign In</button>
           </p>
+          </div>
         </div>
       </div>
     </div>
