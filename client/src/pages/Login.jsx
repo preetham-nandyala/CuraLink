@@ -88,9 +88,9 @@ const Login = () => {
                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                error={errors.password}
              />
-             <a href="#" className="absolute top-0 right-0 text-xs font-semibold text-[#0F6E56] hover:text-[#1D9E75] transition-colors mt-0.5">
+             <button type="button" onClick={() => navigate('/forgot-password')} className="absolute top-0 right-0 text-xs font-semibold text-[#0F6E56] hover:text-[#1D9E75] transition-colors mt-0.5">
                Forgot password?
-             </a>
+             </button>
           </div>
 
           <div className="pt-2">

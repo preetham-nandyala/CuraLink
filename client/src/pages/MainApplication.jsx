@@ -321,8 +321,10 @@ const MainApplication = () => {
       )}
       
       {/* SIDEBAR */}
-      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-30 w-72 h-full flex flex-col bg-surface border-r-2 border-outline-variant/40 shadow-2xl md:shadow-[8px_0_40px_rgba(0,0,0,0.08)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden`}>
-        <div className="flex items-center justify-between px-4 h-12 border-b border-outline-variant/15 flex-none">
+      <aside className={`fixed md:relative z-30 flex-col h-full bg-surface border-r-2 border-outline-variant/40 shadow-2xl md:shadow-[8px_0_40px_rgba(0,0,0,0.08)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden
+        ${sidebarOpen ? 'translate-x-0 w-72 flex' : '-translate-x-full w-72 md:w-0 md:border-r-0 flex'}
+      `}>
+        <div className="flex items-center justify-between px-4 h-12 border-b border-outline-variant/15 flex-none w-72">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <Stethoscope size={14} className="text-white" />
@@ -334,14 +336,14 @@ const MainApplication = () => {
           </button>
         </div>
 
-        <div className="px-3 pt-3 pb-2 flex-none">
+        <div className="px-3 pt-3 pb-2 flex-none w-72">
           <button onClick={startNew} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border border-outline-variant/30 text-[15px] md:text-sm font-medium text-on-surface hover:bg-surface-container transition-colors">
             <Plus size={15} /> New Research
           </button>
         </div>
 
         {user && (
-          <div className="px-4 pt-3 pb-1.5 flex items-center justify-between flex-none">
+          <div className="px-4 pt-3 pb-1.5 flex items-center justify-between flex-none w-72">
             <span className="text-[12px] md:text-[11px] font-bold uppercase tracking-widest text-outline">History</span>
             {conversations.length > 0 && (
               <button onClick={clearAll} className="text-[12px] md:text-[11px] text-outline hover:text-error transition-colors">Clear all</button>
@@ -349,15 +351,15 @@ const MainApplication = () => {
           </div>
         )}
 
-        <nav className="flex-1 overflow-y-auto px-2 pb-2 space-y-px mt-1">
+        <nav className="flex-1 overflow-y-auto px-2 pb-2 space-y-px mt-1 w-72">
           {!user ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="flex flex-col items-center justify-center h-full text-center px-4 w-full">
               <span className="text-xs text-outline leading-relaxed">Sign in or create an account to save your chat history and unlock all features.</span>
             </div>
           ) : loadingHistory ? (
-            <div className="flex justify-center py-6"><Loader2 className="animate-spin text-outline" size={16} /></div>
+            <div className="flex justify-center py-6 w-full"><Loader2 className="animate-spin text-outline" size={16} /></div>
           ) : conversations.length === 0 ? (
-            <div className="text-xs text-outline text-center mt-4">No history yet.</div>
+            <div className="text-xs text-outline text-center mt-4 w-full">No history yet.</div>
           ) : conversations.map(c => (
             <button key={c._id} onClick={() => loadConversation(c._id)}
               className={`w-full group flex items-center gap-1 px-3 py-2 rounded-md text-left text-[14px] md:text-[13px] transition-colors ${conversationId === c._id ? 'bg-surface-container font-medium text-on-surface' : 'text-on-surface-variant hover:bg-surface-container/60'}`}>
@@ -369,11 +371,11 @@ const MainApplication = () => {
           ))}
         </nav>
 
-        <div className="px-3 py-2.5 border-t border-outline-variant/15 flex items-center justify-between flex-none">
+        <div className="px-3 py-2.5 border-t border-outline-variant/15 flex items-center justify-between flex-none w-72">
           {user ? (
             <>
               <span className="text-xs font-medium text-on-surface truncate">{user.name}</span>
-              <button onClick={() => { logout(); navigate('/'); }} className="text-xs font-medium text-primary hover:text-error transition-colors">Logout</button>
+              <button onClick={() => { logout(); navigate('/'); }} className="text-xs font-medium text-primary hover:text-error transition-colors flex-none">Logout</button>
             </>
           ) : (
             <div className="w-full flex justify-between gap-2">
@@ -387,8 +389,8 @@ const MainApplication = () => {
       {/* MAIN */}
       <main className="flex-1 flex flex-col h-full min-w-0 relative">
         {/* TOP HEADER BAR */}
-        <div className="flex items-center gap-3 px-3 md:px-5 h-12 border-b border-outline-variant/15 flex-none bg-surface/80 backdrop-blur-md z-10">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface transition-colors flex-none">
+        <div className="flex items-center gap-3 px-3 md:px-5 h-12 border-b border-outline-variant/15 flex-none bg-surface/80 backdrop-blur-md z-10 transition-all">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className={`${sidebarOpen ? 'md:hidden' : ''} p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface transition-colors flex-none`}>
             {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
           </button>
           <div className="flex-1 min-w-0">
