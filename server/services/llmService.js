@@ -101,47 +101,76 @@ Output:`;
 
     if (intent === 'NON_MEDICAL') {
       const rejection = JSON.stringify({
-        token: JSON.stringify({
-          condition_overview: "This system is designed for medical and research-related queries. Please ask about diseases, treatments, research, or clinical trials.",
-          research_insights: [],
-          treatment_direction: "",
-          patient_summary: "",
-          key_takeaway: "Non-medical query detected.",
-          limitations: "",
-          clinical_trials: [],
-          publications: []
-        }),
-        done: true
+        conditionOverview: "This system is designed for medical and research-related queries. Please ask about diseases, treatments, research, or clinical trials.",
+        researchInsights: [],
+        clinicalTrialsSummary: "",
+        personalizedRecommendation: "",
+        followUpSuggestions: []
       });
-      res.write(`data: ${rejection}\n\n`);
-      res.end();
-      return;
-    }
-
-    const messages = this._buildMessages({ userQuery, publications, trials, context, history, queryInfo, intent });
-    let fullResponse = '';
-
-    try {
-      const stream = await this.groq.chat.completions.create({
-        model: this.model,
-        messages,
-        max_tokens: LLM_MAX_TOKENS,
-        temperature: LLM_TEMPERATURE,
-        stream: true,
-        response_format: { type: 'json_object' },
-      });
-
-      for await (const chunk of stream) {
-        const token = chunk.choices[0]?.delta?.content || '';
-        fullResponse += token;
-        if (token) res.write(`data: ${JSON.stringify({ token })}\n\n`);
-      }
-
+      res.write(`data: ${JSON.stringify({ token: rejection })}\n\n`);
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
       res.end();
-      return fullResponse || this._fallbackResponse(publications, trials, userQuery);
+      return rejection;
+    }
+
+    const contextBlock = this._contextBlock(context, history);
+
+    // --- PROMPT 1: LITERATURE ENGINE ---
+    const sysPrompt1 = `You are a Medical Research Insights Engine. Focus purely on literature and condition overviews. Base ALL claims ONLY on the provided research data. No prose outside JSON.
+MANDATORY JSON SCHEMA:
+{
+  "conditionOverview": "string",
+  "researchInsights": [
+    { "finding": "string", "sourcePMID": "string", "confidence": "high|medium|low" }
+  ],
+  "personalizedRecommendation": "string"
+}`;
+
+    const msg1 = [
+      { role: 'system', content: sysPrompt1 },
+      { role: 'user', content: `${contextBlock}\n\nPUBLICATIONS DATA:\n${this._sourcesBlock(publications, [])}\n\nUSER QUERY:\n"${userQuery}"` }
+    ];
+
+    // --- PROMPT 2: CLINICAL STATUS ENGINE ---
+    const sysPrompt2 = `You are a Clinical Trials Synthesizer. Focus purely on the clinical/experimental pipeline status. Base ALL claims ONLY on the provided trials data. No prose outside JSON.
+MANDATORY JSON SCHEMA:
+{
+  "clinicalTrialsSummary": "string",
+  "followUpSuggestions": ["string", "string", "string"]
+}`;
+
+    const msg2 = [
+      { role: 'system', content: sysPrompt2 },
+      { role: 'user', content: `${contextBlock}\n\nCLINICAL TRIALS DATA:\n${this._sourcesBlock([], trials)}\n\nUSER QUERY:\n"${userQuery}"` }
+    ];
+
+    try {
+      console.log('⚡ Firing Dual-LLM Map-Reduce Engine...');
+      // Execute Map-Reduce simultaneously!
+      const [res1, res2] = await Promise.all([
+        this.groq.chat.completions.create({
+          model: this.model, messages: msg1, max_tokens: 1500, temperature: LLM_TEMPERATURE, response_format: { type: 'json_object' },
+        }),
+        this.groq.chat.completions.create({
+          model: this.model, messages: msg2, max_tokens: 1000, temperature: LLM_TEMPERATURE, response_format: { type: 'json_object' },
+        })
+      ]);
+
+      const data1 = JSON.parse(res1.choices[0]?.message?.content || '{}');
+      const data2 = JSON.parse(res2.choices[0]?.message?.content || '{}');
+
+      // Merge payloads instantly
+      const finalJson = { ...data1, ...data2 };
+      const outputStr = JSON.stringify(finalJson);
+
+      // Fire in one instant burst to the UI stream
+      res.write(`data: ${JSON.stringify({ token: outputStr })}\n\n`);
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+
+      return outputStr;
     } catch (error) {
-      console.error('❌ LLM streaming error:', error.message);
+      console.error('❌ Dual LLM execution error:', error.message);
       const fallback = this._fallbackResponse(publications, trials, userQuery);
       res.write(`data: ${JSON.stringify({ token: fallback, done: true })}\n\n`);
       res.end();
