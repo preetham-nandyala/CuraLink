@@ -9,7 +9,9 @@ const { LLM_TEMPERATURE, LLM_MAX_TOKENS } = require('../config/constants');
  */
 class LLMService {
   constructor() {
-    this.groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    this.groq1 = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    // Use second key if available, otherwise fallback to the first key
+    this.groq2 = new Groq({ apiKey: process.env.GROQ_API_KEY_2 || process.env.GROQ_API_KEY });
     this.model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
   }
 
@@ -33,7 +35,7 @@ class LLMService {
     const messages = this._buildMessages({ userQuery, publications, trials, context, history, queryInfo, intent });
 
     try {
-      const completion = await this.groq.chat.completions.create({
+      const completion = await this.groq1.chat.completions.create({
         model: this.model,
         messages,
         max_tokens: LLM_MAX_TOKENS,
@@ -63,7 +65,7 @@ Input: "${userQuery}"
 Output:`;
 
     try {
-      const completion = await this.groq.chat.completions.create({
+      const completion = await this.groq1.chat.completions.create({
         model: this.model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 50,
@@ -145,13 +147,13 @@ MANDATORY JSON SCHEMA:
     ];
 
     try {
-      console.log('⚡ Firing Dual-LLM Map-Reduce Engine...');
-      // Execute Map-Reduce simultaneously!
+      console.log('⚡ Firing Dual-LLM Map-Reduce Engine with Load Balancing...');
+      // Execute Map-Reduce simultaneously using BOTH keys!
       const [res1, res2] = await Promise.all([
-        this.groq.chat.completions.create({
+        this.groq1.chat.completions.create({
           model: this.model, messages: msg1, max_tokens: 1500, temperature: LLM_TEMPERATURE, response_format: { type: 'json_object' },
         }),
-        this.groq.chat.completions.create({
+        this.groq2.chat.completions.create({
           model: this.model, messages: msg2, max_tokens: 1000, temperature: LLM_TEMPERATURE, response_format: { type: 'json_object' },
         })
       ]);
