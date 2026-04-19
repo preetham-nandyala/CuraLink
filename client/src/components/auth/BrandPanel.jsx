@@ -3,7 +3,7 @@ import { BookOpen, Search, Activity, Stethoscope } from 'lucide-react';
 
 const BrandPanel = () => {
   return (
-    <div className="hidden lg:flex lg:w-1/2 bg-[#0F6E56] flex-col justify-center px-12 text-white">
+    <div className="w-full h-full bg-[#0F6E56] flex flex-col justify-center px-12 text-white">
       <div className="max-w-md mx-auto">
         <h1 className="text-4xl font-bold mb-4 font-headline tracking-tight flex items-center gap-3">
           <Stethoscope size={36} className="text-white" />

@@ -166,8 +166,15 @@ const Register = () => {
                 </div>
               )}
             </div>
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col gap-3">
               <AuthButton isLoading={isLoading}>Continue</AuthButton>
+              <button 
+                type="button" 
+                onClick={() => navigate('/chat')} 
+                className="w-full py-2.5 rounded-lg border-2 border-outline-variant/30 text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors"
+                >
+                Continue as Guest
+              </button>
             </div>
           </form>
         ) : (

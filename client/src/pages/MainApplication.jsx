@@ -108,7 +108,7 @@ const MainApplication = () => {
     ];
 
     try {
-      const payload = { query: q, disease: d, patientName: nameInput.trim() || undefined };
+      const payload = { query: q, disease: d, patientName: n || undefined };
       if (conversationId) payload.conversationId = conversationId;
       const { data } = await axios.post(`${API}/chat/structured`, payload, authHeaders);
       if (data.conversationId) setConversationId(data.conversationId);

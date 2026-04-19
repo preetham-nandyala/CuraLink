@@ -14,11 +14,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/chat" replace />} />
-          <Route path="/chat" element={
-            <ProtectedRoute>
-              <MainApplication />
-            </ProtectedRoute>
-          } />
+          <Route path="/chat" element={<MainApplication />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
