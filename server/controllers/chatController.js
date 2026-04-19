@@ -460,7 +460,8 @@ exports.processStructuredChatStream = async (req, res) => {
       context: conversation.context,
       history: conversation.messages.slice(-6),
       queryInfo: expandedQuery,
-      res // Pass Express response to LLM service where it streams 'data: {"token": "..."}'
+      res,
+      intent // Pass the gated intent
     });
 
     // 4. Context Summarization Layer (0 latency)

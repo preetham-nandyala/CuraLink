@@ -130,6 +130,16 @@ class Reranker {
         semanticScore -= 0.25; // Heavily penalize isolated case reports & emerging biomarkers to protect dominant consensus
       }
 
+      // 4. Domain Verification (The "Anti-Physics" Guard)
+      const medicalKeywords = ['patient', 'clinical', 'treatment', 'therapy', 'disease', 'study', 'trial', 'cell', 'protein', 'gene', 'mutation', 'cancer', 'survival', 'outcome', 'hospital', 'clinic'];
+      const isActuallyMedical = medicalKeywords.some(kw => titleAbs.includes(kw));
+      
+      // If it's a theoretical paper with no medical context, kill it
+      if (!isActuallyMedical) {
+         console.log(`   🚫 Filtering out non-medical paper: "${pub.title.substring(0, 50)}..."`);
+         return; 
+      }
+
       const recency = this._recencyScore(pub.year);
       const credibility = this._credibilityScore(pub);
       const quality = this._qualityScore(pub);

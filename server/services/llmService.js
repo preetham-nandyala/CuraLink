@@ -82,21 +82,21 @@ Output:`;
   async validateMedicalIntent(userQuery) {
     const q = (userQuery || '').toLowerCase().trim();
     
-    // Fast path for obvious small talk (heuristic)
-    const commonNonMed = ["hello", "hi", "how are you", "who are you", "thank you", "thanks", "hey"];
-    if (commonNonMed.some(k => q === k || q.startsWith(k + ' ')) && q.length < 30) {
-      return 'NON_MEDICAL';
-    }
+    // Hard-coded fast path for common debris
+    const trivial = ["hi", "hello", "hey", "test", "thanks", "thank you", "how are you", "who are you"];
+    if (trivial.includes(q)) return 'NON_MEDICAL';
 
-    // LLM validation for ambiguous queries
-    const prompt = `Classify this user query for a medical research assistant.
+    // LLM validation for everything else
+    const prompt = `Act as a strict gatekeeper for a medical research platform.
+Is the following query related to medical research, diseases, treatments, or clinical trials?
+
 Query: "${userQuery}"
 
 Rules:
-1. If the query is about diseases, treatments, clinical trials, scientific research, drug discovery, symptoms, or patient care, return "MEDICAL".
-2. If it is about greetings, physics, math, technology (unrelated to medicine), or general prose, return "NON_MEDICAL".
+- If it is a greeting, small talk, general knowledge (history, geography), non-medical technology, math, or physics, return "NON_MEDICAL".
+- If it is about a disease, symptom, medication, clinical trial, or medical study, return "MEDICAL".
 
-Output ONLY the word "MEDICAL" or "NON_MEDICAL".`;
+Output ONLY the word "MEDICAL" or "NON_MEDICAL". No explanation.`;
 
     try {
       const completion = await this.groq1.chat.completions.create({
@@ -106,10 +106,10 @@ Output ONLY the word "MEDICAL" or "NON_MEDICAL".`;
         temperature: 0,
       });
       const res = completion.choices[0]?.message?.content?.trim().toUpperCase();
-      console.log(`🧠 Intent Validation: "${userQuery}" -> ${res}`);
+      console.log(`🛡️  GATEKEEPER: "${userQuery}" -> ${res}`);
       return res.includes('MEDICAL') && !res.includes('NON_') ? 'MEDICAL' : 'NON_MEDICAL';
     } catch (err) {
-      console.warn('⚠️ Intent LLM failed, using heuristic');
+      console.warn('⚠️ Gatekeeper LLM error:', err.message);
       return this._detectIntent(userQuery);
     }
   }
@@ -133,8 +133,8 @@ Output ONLY the word "MEDICAL" or "NON_MEDICAL".`;
     return 'GENERAL_MEDICAL';
   }
 
-  async generateStreamingResponse({ userQuery, publications, trials, context, history, queryInfo, res }) {
-    const intent = this._detectIntent(userQuery, history);
+  async generateStreamingResponse({ userQuery, publications, trials, context, history, queryInfo, res, intent: providedIntent }) {
+    const intent = providedIntent || this._detectIntent(userQuery, history);
 
     if (intent === 'NON_MEDICAL') {
       const rejection = JSON.stringify({
@@ -142,7 +142,7 @@ Output ONLY the word "MEDICAL" or "NON_MEDICAL".`;
         researchInsights: [],
         clinicalTrialsSummary: "",
         personalizedRecommendation: "",
-        followUpSuggestions: []
+        followUpSuggestions: ["Latest lung cancer research", "Clinical trials for diabetes", "Heart disease studies"]
       });
       res.write(`data: ${JSON.stringify({ token: rejection })}\n\n`);
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
