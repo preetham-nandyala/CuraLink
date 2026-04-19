@@ -58,6 +58,7 @@ const MainApplication = () => {
       const { data } = await axios.get(`${API}/conversations/${id}`, authHeaders);
       setConversationId(data._id);
       setActiveDetail(null);
+      setSidebarOpen(false); // Close sidebar on mobile after selection
       const parsed = (data.messages || []).map((m, i) => {
         if (m.role === 'assistant') {
           let content;
@@ -320,7 +321,7 @@ const MainApplication = () => {
       )}
       
       {/* SIDEBAR */}
-      <aside className={`${sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full w-0'} fixed md:relative z-30 flex-none h-full flex flex-col bg-surface border-r-2 border-outline-variant/40 shadow-2xl md:shadow-[8px_0_40px_rgba(0,0,0,0.08)] bg-opacity-95 transition-all duration-300 overflow-hidden`}>
+      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-30 w-72 h-full flex flex-col bg-surface border-r-2 border-outline-variant/40 shadow-2xl md:shadow-[8px_0_40px_rgba(0,0,0,0.08)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden`}>
         <div className="flex items-center justify-between px-4 h-12 border-b border-outline-variant/15 flex-none">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
@@ -385,13 +386,24 @@ const MainApplication = () => {
 
       {/* MAIN */}
       <main className="flex-1 flex flex-col h-full min-w-0 relative">
-        {!sidebarOpen && (
-          <div className="absolute top-2 left-2 z-20">
-            <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-lg bg-surface shadow-sm border border-outline-variant/20 text-outline hover:text-on-surface transition-colors">
-              <PanelLeftOpen size={16} />
+        {/* TOP HEADER BAR */}
+        <div className="flex items-center gap-3 px-3 md:px-5 h-12 border-b border-outline-variant/15 flex-none bg-surface/80 backdrop-blur-md z-10">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface transition-colors flex-none">
+            {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+          </button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-semibold font-headline truncate">
+              {messages.length > 0
+                ? (messages.find(m => m.role === 'user')?.content || 'Research Session').substring(0, 60)
+                : 'New Research'}
+            </h1>
+          </div>
+          <div className="flex items-center gap-1 flex-none">
+            <button onClick={startNew} className="p-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface transition-colors" title="New chat">
+              <Plus size={16} />
             </button>
           </div>
-        )}
+        </div>
 
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-5 py-6 w-full">
