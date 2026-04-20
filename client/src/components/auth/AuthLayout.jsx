@@ -7,8 +7,10 @@ const AuthLayout = ({ children }) => {
       className="flex min-h-screen font-body relative bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')" }}
     >
-      {/* Mobile background overlay - transparent on desktop since desktop has its own background */}
-      <div className="absolute inset-0 bg-black/50 lg:bg-[#F8FAFB] z-0"></div>
+      {/* Mobile background overlay - beautiful medical blue gradient for better readability on phones, while desktop remains white */}
+      <div className="absolute inset-0 bg-[#0F6E56]/85 sm:bg-[#0F6E56]/90 lg:bg-[#F8FAFB] z-0 mix-blend-multiply lg:mix-blend-normal"></div>
+      {/* Additional blue tint for mobile */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A2540]/80 via-[#0F6E56]/60 to-transparent lg:hidden z-0"></div>
 
       <div className="hidden lg:flex lg:w-1/2 fixed inset-y-0 left-0 z-0">
         <BrandPanel />

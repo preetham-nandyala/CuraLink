@@ -343,10 +343,10 @@ const MainApplication = () => {
         </div>
 
         {user && (
-          <div className="px-4 pt-3 pb-1.5 flex items-center justify-between flex-none w-72">
-            <span className="text-[12px] md:text-[11px] font-bold uppercase tracking-widest text-outline">History</span>
+          <div className="px-4 pt-4 md:pt-3 pb-2 md:pb-1.5 flex items-center justify-between flex-none w-72">
+            <span className="text-[14px] md:text-[11px] font-bold uppercase tracking-widest text-outline">History</span>
             {conversations.length > 0 && (
-              <button onClick={clearAll} className="text-[12px] md:text-[11px] text-outline hover:text-error transition-colors">Clear all</button>
+              <button onClick={clearAll} className="text-[14px] md:text-[11px] text-outline hover:text-error transition-colors font-medium md:font-normal">Clear all</button>
             )}
           </div>
         )}
@@ -354,7 +354,7 @@ const MainApplication = () => {
         <nav className="flex-1 overflow-y-auto px-2 pb-2 space-y-px mt-1 w-72">
           {!user ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4 w-full">
-              <span className="text-xs text-outline leading-relaxed">Sign in or create an account to save your chat history and unlock all features.</span>
+              <span className="text-[15px] md:text-xs text-outline leading-relaxed mt-10 md:mt-0 font-medium md:font-normal">Sign in or create an account to save your chat history and unlock all features.</span>
             </div>
           ) : loadingHistory ? (
             <div className="flex justify-center py-6 w-full"><Loader2 className="animate-spin text-outline" size={16} /></div>
@@ -362,8 +362,8 @@ const MainApplication = () => {
             <div className="text-xs text-outline text-center mt-4 w-full">No history yet.</div>
           ) : conversations.map(c => (
             <button key={c._id} onClick={() => loadConversation(c._id)}
-              className={`w-full group flex items-center gap-1 px-3 py-2 rounded-md text-left text-[14px] md:text-[13px] transition-colors ${conversationId === c._id ? 'bg-surface-container font-medium text-on-surface' : 'text-on-surface-variant hover:bg-surface-container/60'}`}>
-              <span className="flex-1 truncate">{c.title || c.userProfile?.diseaseOfInterest || c.context?.diseases?.[0] || 'Untitled'}</span>
+              className={`w-full group flex items-center gap-1 px-3 py-3.5 md:py-2 rounded-md text-left text-[15px] md:text-[13px] transition-colors ${conversationId === c._id ? 'bg-surface-container font-semibold md:font-medium text-on-surface' : 'text-on-surface-variant hover:bg-surface-container/60'}`}>
+              <span className="flex-1 truncate leading-tight">{c.title || c.userProfile?.diseaseOfInterest || c.context?.diseases?.[0] || 'Untitled'}</span>
               <span onClick={(e) => deleteConvo(c._id, e)} className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-error transition-all flex-none">
                 <Trash2 size={12} />
               </span>
@@ -371,16 +371,16 @@ const MainApplication = () => {
           ))}
         </nav>
 
-        <div className="px-3 py-2.5 border-t border-outline-variant/15 flex items-center justify-between flex-none w-72">
+        <div className="px-3 py-4 md:py-2.5 border-t border-outline-variant/15 flex items-center justify-between flex-none w-72">
           {user ? (
             <>
-              <span className="text-xs font-medium text-on-surface truncate">{user.name}</span>
-              <button onClick={() => { logout(); navigate('/'); }} className="text-xs font-medium text-primary hover:text-error transition-colors flex-none">Logout</button>
+              <span className="text-sm md:text-xs font-medium text-on-surface truncate">{user.name}</span>
+              <button onClick={() => { logout(); navigate('/'); }} className="text-sm md:text-xs font-bold md:font-medium text-primary hover:text-error transition-colors flex-none">Logout</button>
             </>
           ) : (
-            <div className="w-full flex justify-between gap-2">
-              <button onClick={() => navigate('/login')} className="flex-1 text-center py-1.5 rounded-md text-xs font-medium bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">Log in</button>
-              <button onClick={() => navigate('/register')} className="flex-1 text-center py-1.5 rounded-md text-xs font-medium bg-primary text-white hover:bg-primary-hover transition-colors">Sign up</button>
+            <div className="w-full flex justify-between gap-3 md:gap-2">
+              <button onClick={() => navigate('/login')} className="flex-1 text-center py-2.5 md:py-1.5 rounded-lg md:rounded-md text-[15px] md:text-xs font-semibold md:font-medium bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface">Log in</button>
+              <button onClick={() => navigate('/register')} className="flex-1 text-center py-2.5 md:py-1.5 rounded-lg md:rounded-md text-[15px] md:text-xs font-semibold md:font-medium bg-primary hover:bg-primary-hover transition-colors text-white shadow-sm">Sign up</button>
             </div>
           )}
         </div>
